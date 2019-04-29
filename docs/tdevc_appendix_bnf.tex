@@ -1,0 +1,129 @@
+\chapter{Descrição BNF da Temporal DevC}
+\label{ap:bnf}
+
+<input> ::= <tdevcimport> <tdevcspec>\\
+\\
+<tdevcimport> ::= \textbf{import} \textit{id:string} \textbf{;} \\
+ | \textit{*EMPTY*} \\
+\\
+<tdevcspec> ::= \textbf{device(} \textit{id:string} \textbf{) \{} <object\_definition> \textbf{\}} \\
+\\
+<object\_definition> ::= <port\_definition> \textbf{;} <object\_definition> \\
+ | <pattern\_definition> \textbf{;} <object\_definition> \\
+ | <service\_definition> \textbf{;} <object\_definition> \\
+ | \textbf{*} <service\_definition> \textbf{;} <object\_definition> \\
+ | <requirement\_definition> \textbf{;} <object\_definition> \\
+ | <exception\_definiton> \textbf{;} <object\_definition> \\
+ | <format\_definition> \textbf{;} <object\_definition> \\
+ | <storage\_definition> \textbf{;} <object\_definition> \\
+% | \textbf{<osmap\_definition>} ; \textbf{<object\_definition>} \\
+ | <behaviors\_definition> \textbf{;} <bindings\_definition> \textbf{;}\\
+\\
+<pattern\_definition> ::= \textbf{pattern} \textit{id:string} \textbf{=} \textit{val:int}\\
+| \textbf{pattern} \textit{id:string} \textbf{= mask (} <bits> \textbf{)} \\
+\\
+<bits> ::= \textit{mask:mask\_rep} <bits> \\
+| \textbf{.} <bits> \\
+| \textit{mask:mask\_rep}\\
+| \textbf{.}\\
+\\
+<format\_definition> ::= \textbf{format} \textit{id:string} \textbf{\{} <fields\_decl> \textbf{\}}\\
+\\
+<service\_definition> ::=  \textbf{service} \textit{id:string}\\
+\\
+<storage\_definition> ::= <visibility> <reg\_decl> \\
+| <var\_decl> \\
+\\
+<reg\_decl> ::= \textbf{register} \textit{id:string} \textbf{(} \textit{val:int} \textbf{)} \textbf{\{} <fields\_decl> \textbf{\}}\\
+| \textbf{register} \textit{id:string} \textbf{(} \textit{val:int} \textbf{) alias} \textit{id:string} \textbf{\{} <fields\_decl> \textbf{\}}\\
+| \textbf{register} \textit{id:string} \textbf{(} \textit{val:int} \textbf{) =} \textit{id:string}\\
+| \textbf{register} \textit{id:string} \textbf{(} \textit{val:int} \textbf{) alias} \textit{id:string} \textbf{=} \textit{id:string}\\
+\\
+<fields\_decl> ::= <field\_decl> \textbf{;} \\
+| <field\_decl> \textbf{;} <fields\_decl>\\
+\\
+<field\_decl> ::= <rw> \textit{id:string} \textbf{[} \textit{val:int} \textbf{]}\\
+| <rw> \textit{id:string} \textbf{[} \textit{start:int} \textbf{:} \textit{end:int} \textbf{]}\\
+| \textbf{reserved} \textbf{\{} <fields\_decl> \textbf{\}}\\
+| <rw> \textbf{reserved} \textbf{[} \textit{start:int} \textbf{:} \textit{end:int} \textbf{]}\\
+| <rw> \textbf{reserved} \textbf{[} \textit{val:int} \textbf{]}\\
+| \textit{id:string} \textbf{\{} <fields\_decl> \textbf{\}}\\
+\\
+<rw\_ex> ::= \textbf{READ}\\
+| \textbf{WRITE}\\
+\\
+<rw> ::= \textbf{READ}\\
+| \textbf{WRITE}\\
+| \textbf{RW}\\
+\\
+<behaviors\_definition> ::= behaviors \textbf{\{} <behaviors\_body> \textbf{\}}\\
+\\
+<behaviors\_body> ::= <action\_def> <behaviors\_body> \\
+| <action\_def> \\
+\\
+<bindings\_definition> ::= bindings \textbf{\{} <bindings\_body> \textbf{\}}\\
+\\
+<bindings\_body> ::= \textit{id:string} \textbf{requires} <id\_list> <bind\_order> ;\\
+| \textit{id:string} \textbf{requires\_and} <id\_list> <bind\_order> ;\\
+| \textit{id:string} \textbf{always\_requires} <id\_list> ; \\
+| \textit{id:string} \textbf{requires} <id\_list> <bind\_order> ; <bindings\_body>\\
+| \textit{id:string} \textbf{requires\_and} <id\_list> <bind\_order> ;\\ <bindings\_body>\\
+| \textit{id:string} \textbf{always\_requires} <id\_list> ; <bindings\_body>\\
+| \textit{id:string} \textbf{.} \textbf{addconstraints} \textbf{(} <id\_list> \textbf{)} ; \\
+| \textit{id:string} \textbf{.} \textbf{addconstraints} \textbf{(} <id\_list> \textbf{)} ; <bindings\_body>\\
+| \textit{id:string} \textbf{.} \textbf{addtriggers} \textbf{(} <id\_list> \textbf{)} ; \\
+| \textit{id:string} \textbf{.} \textbf{addtriggers} \textbf{(} <id\_list> \textbf{)} ; <bindings\_body>\\
+\\
+
+\textbf{<expr>} ::= \textbf{<l\_expr>} \\
+| \textbf{<assign>} ; \\
+| \right[  \textbf{<random\_assign>} \right]  \\
+| <sinc\_decl> ; \\
+| \textbf{<l\_expr>} \textbf{<expr>} \\
+| \textbf{<assign>} ; \textbf{<expr>} \\
+| \right[ \textbf{<random\_assign>} \right] \right[ \\
+| \textbf{<sinc\_decl>} ; \textbf{<expr>} \\
+\\
+\textbf{<random\_assign>} ::= \textbf{<assign>} ;
+| * \textbf{<assign>} ; \\
+| \textbf{<random\_assign>} \textbf{<assign>} ; \\
+| \textbf{<random\_assign>} * \textbf{<assign>} ; \\
+\\
+\textbf{<l\_expr>} ::= \textbf{<expr\_cond>} { \textbf{<expr>} } \\
+\\
+\textbf{<expr\_cond>} ::= \textbf{<cond>} \textbf{<logic\_oper>} \textbf{<expr\_cond>} \\
+| \textbf{<cond>} \\
+| \textbf{<expr\_cond\_block>} \textbf{<logic\_oper>} \textbf{<expr\_cond>} \\
+| \textbf{<expr\_cond\_block>} \\
+\\
+\textbf{<expr\_cond\_block>} ::= ( \textbf{<expr\_cond>} ) \\
+\\
+\textbf{<assign>} ::= \textbf{<string>} = \textbf{<int>} \\
+| \textbf{<string>} . \textbf{<string>} = \textbf{<int>} \\
+| \textbf{<string>} . \textbf{<string>} . \textbf{<string>} = \textbf{<int>} \\
+\\
+\textbf{<sinc\_decl>} ::= \textbf{<wait\_decl>} \\
+| \textbf{<intr\_decl>} \\
+| \textbf{<poll\_decl>} \\
+\\
+\textbf{<wait\_decl>} ::= wait\_state ( \textbf{<cond>} > \\
+\\
+\textbf{<intr\_decl>} ::= interrupt ( \textbf{<cond>} ) \\
+\\
+\textbf{<poll\_decl>} ::= polling ( \textbf{<cond>} ) \\
+\\
+\textbf{<cond>} ::= \textbf{<string>} \textbf{<oper>} \textbf{<int>} \\
+| \textbf{<string>} . \textbf{<string>} \textbf{<oper>} \textbf{<int>} \\
+| \textbf{<string>} . \textbf{<string>} . \textbf{<string>} \textbf{<oper>} \textbf{<int>} \\
+| \textbf{<string>} > \textbf{<int>} \\
+| \textbf{<string>} . \textbf{<string>} > \textbf{<int>} \\
+| \textbf{<string>} . \textbf{<string>} . \textbf{<string>} > \textbf{<int>} \\
+| \textbf{<string>} < \textbf{<int>} \\
+| \textbf{<string>} . \textbf{<string>} < \textbf{<int>} \\
+| \textbf{<string>} . \textbf{<string>} . \textbf{<string>} < \textbf{<int>} \\
+\\
+\textbf{<mask\_rep>} ::= [01.] \\
+\textbf{<int>} ::= [0-9]+ \\
+\textbf{<string>} ::= [\_a-zA-Z][\_a-zA-Z0-9]^{*} \\
+\textbf{<logic\_oper>} ::= \&\& \ | \ || \\
+\textbf{<oper>} ::= == | != | <= | >= \\

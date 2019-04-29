@@ -1,0 +1,15 @@
+<%@jet package="br.ufpe.cin.greco.devc.languageStructure.tdevctemplate" imports="br.ufpe.cin.greco.devc.languageStructure.* br.ufpe.cin.greco.devc.languageStructure.automata.* java.util.*" class="TDEVCNodeElseConditionBody" %>
+<%ArrayList params = (ArrayList) argument;
+Service service = (Service) params.get(0);
+Edge edge = (Edge) params.get(1);
+Condition condition = (Condition) params.get(2);
+HashSet<String> visitedStates_p = (HashSet<String>) params.get(3);  
+%>
+	}else{
+		this->addCoverageCount(<%=service.addFlowCoverageNode(edge.getFrom())%>);
+		return edge.getTo().getName();
+	}
+}else{
+	errorMsg = "In to Rejected State: Register not readed before";
+	printf("In to Rejected State: Register not readed before");
+}

@@ -1,0 +1,8 @@
+digraph EPDR{
+node [shape = "record" 
+ style="filled" ];
+node0 [ label = "[0:7] EE_PHY_L[RW]"
+ fillcolor = "green"];
+node1 [ label = "[8:15] EE_PHY_H[RW]"
+ fillcolor = "green"];
+}

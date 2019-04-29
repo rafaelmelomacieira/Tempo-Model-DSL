@@ -1,0 +1,20 @@
+digraph RCR{
+node [shape = "record" 
+ style="filled" ];
+node0 [ label = "[0] RXEN[RW]"
+ fillcolor = "green"];
+node1 [ label = "[1] PRMSC[RW]"
+ fillcolor = "green"];
+node2 [ label = "[2] RUNT[RW]"
+ fillcolor = "green"];
+node3 [ label = "[3] ALL[RW]"
+ fillcolor = "green"];
+node4 [ label = "[4] DIS_CRC[RW]"
+ fillcolor = "green"];
+node5 [ label = "[5] DIS_LONG[RW]"
+ fillcolor = "green"];
+node6 [ label = "[6] WTDIS[RW]"
+ fillcolor = "green"];
+node7 [ label = "[7] RESERVED[--]"
+ fillcolor = "red"];
+}

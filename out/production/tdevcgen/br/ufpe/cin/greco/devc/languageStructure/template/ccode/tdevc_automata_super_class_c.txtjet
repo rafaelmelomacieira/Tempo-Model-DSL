@@ -1,0 +1,298 @@
+<%@jet package="br.ufpe.cin.greco.devc.languageStructure.tdevctemplate.ccode" imports="br.ufpe.cin.greco.devc.languageStructure.* java.util.*" class="TDEVCAutomataSuperClassC" %>
+<%
+//TDCCheckerGenerator tdgen = (TDCCheckerGenerator)argument;
+//Service service = tdgen.getCurrentService();
+%>
+/**************************************************************************/
+/***********               	tdc_automata.c      		***********/
+/**************************************************************************/
+/**************************************************************************/
+/*********** 		        UFPE/Cin - Greco		***********/
+/*********** 		 http://www.cin.ufpe.br/~greco 		***********/
+/*********** 		    Copyright(C) 2011, 2012     	***********/
+/***********							***********/
+/*********** 		    By Rafael Melo Macieira		***********/
+/***********							***********/
+/***********		    E-mail: rmm2@cin.ufpe.br		***********/
+/**************************************************************************/
+/**************************************************************************/
+/**		 Automata Reference for the temporal check		 **/
+/**************************************************************************/
+
+#include "headers/tdc_automata.h"
+//#include "tdc_automata.h"
+#include <stdio.h>
+//#include <iostream>
+
+//################################ TDC_Automata #############################
+
+/*void TDC_Automata::printRejection(StateID stateID){};
+int TDC_Automata::checkState(StateID stateID){};
+int TDC_Automata::checkInitialState(){};
+TDC_Automata::StateID TDC_Automata::getNextState(StateID stateID){};
+std::string TDC_Automata::runStep(bool access_type, VarList* currentVarList, int* rError){};
+void TDC_Automata::refreshVariables(VarList* currentVarList){};
+void TDC_Automata::reset(){};*/
+
+/*TDC_Automata::TDC_Automata(char* name, unsigned int automataSteps){//, VarList mainVarList){
+  int i;
+  //unsigned int *realCoverage[automataSteps];
+  this->name = name;
+  this->end = false;
+  this->steps = automataSteps;
+  //this->coverage = realCoverage; 
+  for (i = 0;i<this->steps;i++){
+    this->coverage[i] = 0;
+  }
+  };*/
+
+/*std::string int2string(unsigned int number){
+       std::ostringstream oss;
+       oss << number;
+       return oss.str();
+       };*/
+
+void addCoverageCount(struct TDC_Automata *automata, unsigned int index){
+  automata->coverage[index]++;
+};
+
+void setCurrentVarList(struct TDC_Automata *automata, struct VarList *var){
+	automata->currentVarList = var;
+};
+
+struct VarList* getCurrentVarList(struct TDC_Automata *automata){
+	return automata->currentVarList;
+};
+
+//################################## VARLIST ###############################
+
+/*VarList::VarList(unsigned int platformAddr, std::string name, unsigned int* var, bool readable, bool writable){
+    this->platformAddr = platformAddr;
+    this->var = var;
+    this->name = name;
+    //printf("\nInt Var: %p\n",var);
+    this->EOL = 1;
+    this->updated = 0;
+    this->readable = readable;
+    this->writable = writable;
+    resetBitLastValue();
+};*/
+
+short getPlatformWordLen(struct VarList *varList){
+	return PLATFORM_WORD_LEN;
+};
+
+void resetBitLastValue(struct VarList *varList){
+	int i;
+	for (i = 0; i>PLATFORM_WORD_LEN-1;i++){
+		varList->bitLastValue[i] = 0;
+		varList->bitUsageCounter[i] = 0;
+	}
+};
+
+void countBitUsage(struct VarList *varList,unsigned int value){
+  int i = 0;
+  while (value > 1){
+    if (varList->bitLastValue[i] != (value % 2)){
+      varList->bitLastValue[i] = (value % 2);
+      varList->bitUsageCounter[i]++;
+    }
+    value >>= 1;
+    i++;
+  }
+  if (varList->bitLastValue[i] != value){
+    varList->bitLastValue[i] = (value);
+    varList->bitUsageCounter[i]++;
+  }
+};
+
+char isVarListEOL(struct VarList* varList){
+  return varList->EOL;  
+};
+
+char isAutomataEOL(struct AutomataList* automataList){
+  return automataList->EOL;  
+};
+
+
+void addVarList(struct VarList* mainVarList, struct VarList* varList){
+  struct VarList *currentVarList;
+  currentVarList = mainVarList;
+  while (currentVarList->EOL == 0) {
+    currentVarList = currentVarList->nextVar;
+  }
+  currentVarList->nextVar = varList;
+  currentVarList->EOL = 0;
+};
+
+struct VarList* getNextVar(struct VarList *varList){
+    return varList->nextVar;
+};
+
+unsigned int* getVar(struct VarList *varList){
+    return varList->var;
+};
+
+void setVar(struct VarList *varList, unsigned int* var){
+    //printf("\nSetVat Pre: Atual: %p - Proposto: %p\n", this->var, var);
+    varList->var = var;
+    countBitUsage(varList, *var);
+    //printf("\nSetVat Pos: Atual: %p - proposto: %p\n", this->var, var);
+};
+
+unsigned int getReadVar(struct VarList *varList){
+	return varList->read_var;
+};
+
+void setReadVar(struct VarList *varList, unsigned int var){
+	update(varList);
+	varList->read_var = var;
+};
+
+int isVarEOL(struct VarList *varList){
+    return varList->EOL;
+};
+
+int isUpdated(struct VarList *varList){
+  return varList->updated;
+};
+
+void update(struct VarList *varList){
+  varList->updated = 1;
+  //if (this->platformAddr == 0x40000) std::cout << "UPDATE STATUS";
+};
+
+void undoUpdate(struct VarList *varList){
+  // std::cout << "Undo!!";
+  varList->updated = 0;
+  //if (this->platformAddr == 0x40000) std::cout << "UNDO UPDATE STATUS";
+};
+
+char isReadable(struct VarList *varList){
+	return varList->readable;
+};
+
+char isWritable(struct VarList *varList){
+	return varList->writable;
+};
+
+void clearAllUpdate(struct VarList* mainVarList){
+  struct VarList* tempvar = mainVarList;
+  struct VarList *next;
+  undoUpdate(tempvar);
+  if (!isVarListEOL(tempvar)) {
+    next = getNextVar(tempvar);
+    while (!isVarListEOL(next)) {
+      undoUpdate(next);
+      next = getNextVar(next);
+    }
+    undoUpdate(next);
+  }
+};
+
+unsigned int* getBitUsageCounter(struct VarList *varList){
+	return varList->bitUsageCounter;
+};
+
+unsigned int getVarPlatformAddr(struct VarList *varList){
+    return varList->platformAddr;
+};
+
+struct VarList* getVarListByPlatformAddr(struct VarList* mainVarList, unsigned int platformAddr) {
+    struct VarList *head = mainVarList;
+    struct VarList *temp;
+    struct VarList *retorno = NULL;
+    char achou = 0;
+    for(temp = head; temp != NULL && !achou; temp = temp->nextVar){
+    	if(temp->platformAddr == platformAddr){
+    		retorno = temp;
+    		achou = 1;
+    	}
+    }
+
+    return retorno;
+};
+
+int containsVar(struct VarList* mainVarList, unsigned int platformAddr){
+    struct VarList *head = mainVarList;
+    struct VarList *temp;
+    char achou = 0;
+    for(temp = head; temp != NULL && !achou; temp = temp->nextVar){
+    	if(temp->platformAddr == platformAddr){
+    		achou = 1;
+    	}
+    }
+
+    return achou;
+};
+
+//################################## AUTOMATALIST ###############################
+
+/*AutomataList::AutomataList(unsigned int platformAddr, TDC_Automata* automata){
+  int i;
+  this->platformAddr = platformAddr;
+  this->automata = automata;
+  //printf("\nInt Var: %p\n",var);
+  this->EOL = 1;
+  };*/
+
+void addNextAutomata(struct AutomataList* currentAutomatalist, struct AutomataList* automatalist){
+    currentAutomatalist->nextAutomata = automatalist;
+    currentAutomatalist->EOL = 0;
+};
+
+void addNextVar(struct VarList* currentVarlist, struct VarList* varlist){
+  currentVarlist->nextVar = varlist;
+  currentVarlist->EOL = 0;
+};
+
+struct AutomataList* getNextAutomata(struct AutomataList* automataList){
+    return automataList->nextAutomata;
+};
+
+struct TDC_Automata* getAutomata(struct AutomataList* automataList){
+    return automataList->automata;
+};
+
+void setAutomata(struct AutomataList* automataList,struct TDC_Automata* automata){
+    //printf("\nSetVat Pre: Atual: %p - Proposto: %p\n", this->var, var);
+    automataList->automata = automata;
+    //printf("\nSetVat Pos: Atual: %p - proposto: %p\n", this->var, var);
+};
+
+/*int isAutomataEOL(struct AutomataList* automataList){
+    return automataList->EOL;
+    };*/
+
+unsigned int getAutomataPlatformAddr(struct AutomataList* automataList){
+    return automataList->platformAddr;
+};
+
+struct AutomataList* getAutomataListByPlatformAddr(struct AutomataList* mainAutomataList, unsigned int platformAddr) {
+    struct AutomataList *head = mainAutomataList;
+    struct AutomataList *temp;
+    struct AutomataList *retorno = NULL;
+    char achou = 0;
+    for(temp = head; temp != NULL && !achou; temp = temp->nextAutomata){
+    	if(temp->platformAddr == platformAddr){
+    		retorno = temp;
+    		achou = 1;
+    	}
+    }
+
+    return retorno;
+
+};
+
+char containsAutomata(struct AutomataList* mainAutomataList, unsigned int platformAddr){
+    struct AutomataList *head = mainAutomataList;
+    struct AutomataList *temp;
+    char achou = 0;
+    for(temp = head; temp != NULL && !achou; temp = temp->nextAutomata){
+    	if(temp->platformAddr == platformAddr){
+    		achou = 1;
+    	}
+    }
+
+    return achou;
+};

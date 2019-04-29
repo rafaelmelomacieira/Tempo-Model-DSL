@@ -1,0 +1,4 @@
+name=riscv
+busWidth=32
+numofdevcfiles=1
+devcfile.0=riscv

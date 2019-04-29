@@ -1,0 +1,93 @@
+device(ps2){
+
+	// ****** Patterns' Declarations ******
+	pattern OUTPUTBUFFER_AVAILABLE = 0;
+	pattern INPUTBUFFER_AVAILABLE = 1;
+	pattern SYS_INITIALIZED = 1;
+	pattern KEYBOARD_NOT_INHIBITED = 1;
+	pattern PARITY_ERROR = 1;
+	pattern GENERAL_TIMEOUT = 1;
+	pattern RESET_COMMAND = 0xFF;
+	pattern BAT_SUCESS = 0xAA;
+	
+	// ****** Services' Declarations ******
+	requirement r_outPutBufferAvailable;
+	requirement r_sysInitialized;
+	requirement r_notInhibited;
+	requirement r_parityError;
+	requirement r_generalTimeout;
+	
+	requirement r_outPutBefore;
+	requirement r_outPutAfter;
+	
+	requirement r_outPutCommandReset;
+	
+	requirement r_bat_sucess;
+	
+	requirement r_input_available;
+	
+	service s_reset;
+	service s_readinputdata;
+	
+	// ****** Formats' Declarations ******
+	format buffer_fmt {
+        RW DATA[7:0];
+    }
+	
+	format ps2ControlReg_fmt {
+        RW PSCR[7:0];
+    }
+	
+	// ****** Registers' Declarations ******
+	//dc_reg < ,READ> ps2StatusReg;
+    register ps2StatusReg(0x64) alias PSR {
+        READ PERR[7];
+        READ TO[6];
+        READ MOBF[5];
+        READ INH[4];
+        READ A2[3];
+        READ SYS[2];
+		READ IBF[1];
+        READ OBF[0];
+    }
+	
+	//dc_reg < ,WRITE> ps2ControlReg;
+    register ps2ControlRegOut(0x60) alias PCR_OUT = ps2ControlReg_fmt;
+
+	//dc_reg < ,READ> ps2ControlReg;
+	register ps2ControlRegIn(0x20) alias PCR_IN = ps2ControlReg_fmt; 
+
+	//dcx_reg <rtxdata_fmt,RW> bufferInput_fmt;
+    register buffer(0x60) alias BUF = buffer_fmt;
+	
+	behaviors {
+    
+		r_parityTimeoutError.setactions(PSR.PERR != PARITY_ERROR || PSR.TO != GENERAL_TIMEOUT) {
+            BUF.DATA = RESET_COMMAND;
+		}
+		
+		r_bat_sucess.setactions(BUF.DATA == BAT_SUCESS){
+			maxdelay(800,MS);
+		}
+		
+		r_outPutCommandReset.setactions(PSR.OBF == OUTPUTBUFFER_AVAILABLE && PSR.SYS == SYS_INITIALIZED && PSR.INH == KEYBOARD_NOT_INHIBITED) {
+			BUF.DATA = RESET_COMMAND;	
+		}		
+
+		r_input_available.setactions(PSR.IBF == INPUTBUFFER_AVAILABLE) {
+            		read(BUF);
+		}	
+		
+	}
+	
+	bindings {
+
+        r_parityTimeoutError requires r_outPutCommandReset before;
+        r_outPutCommandReset requires r_bat_sucess after;
+        r_parityTimeoutError requires r_bat_sucess after;
+		
+		//Adding Constraints to the Services
+		s_reset.addconstraints(r_outPutCommandReset, r_bat_sucess);	
+		s_readinputdata.addconstraints(r_input_available);
+	}
+}

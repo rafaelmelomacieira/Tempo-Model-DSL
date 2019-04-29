@@ -1,0 +1,139 @@
+device (riscv) {
+    
+    //RV32I Base Instruction Set
+    pattern INST_LUI   =   mask(.........................0110111);
+    pattern AUIPC_INST =   mask(.........................0010111);
+    pattern JAL_INST   =   mask(.........................1101111);
+    pattern JALR_INST  =   mask(.................000.....1100111);
+    
+    pattern BEQ_INST   =   mask(.................000.....1100011); 
+    pattern BNE_INST   =   mask(.................001.....1100011);
+    pattern BLT_INST   =   mask(.................100.....1100011);
+    pattern BGE_INST   =   mask(.................101.....1100011);
+    pattern BLTU_INST  =   mask(.................110.....1100011);
+    pattern BGEU_INST  =   mask(.................111.....1100011);
+    
+    pattern LB_INST    =   mask(.................000.....0000011);
+    pattern LH_INST    =   mask(.................001.....0000011);
+    pattern LW_INST    =   mask(.................010.....0000011);
+    pattern LBU_INST   =   mask(.................100.....0000011);
+    pattern LHU_INST   =   mask(.................101.....0000011);
+    
+    pattern SB_INST    =   mask(.................000.....0100011);
+    pattern SH_INST    =   mask(.................001.....0100011);
+    pattern SW_INST    =   mask(.................010.....0100011);
+    
+    pattern ADDI_INST  =   mask(.................000.....0010011);
+    pattern SLTI_INST  =   mask(.................010.....0010011);
+    pattern SLTIU_INST =   mask(.................011.....0010011);
+    pattern XORI_INST  =   mask(.................100.....0010011);
+    pattern ORI_INST   =   mask(.................110.....0010011);
+    pattern ANDI_INST  =   mask(.................111.....0010011);
+    
+    pattern SLLI_INST  =   mask(0000000..........001.....0010011);
+    pattern SRLI_INST  =   mask(0000000..........101.....0010011);
+    pattern SRAI_INST  =   mask(0100000..........101.....0010011);
+    
+    pattern ADD_INST   =   mask(0000000..........000.....0110011);
+    pattern SUB_INST   =   mask(0100000..........000.....0110011);
+    pattern SLL_INST   =   mask(0000000..........001.....0110011);
+    pattern SLT_INST   =   mask(0000000..........010.....0110011);
+    pattern SLTU_INST  =   mask(0000000..........011.....0110011);
+    pattern XOR_INST   =   mask(0000000..........100.....0110011);
+    pattern SRL_INST   =   mask(0000000..........101.....0110011);
+    pattern SRA_INST   =   mask(0100000..........101.....0110011);
+    pattern OR_INST    =   mask(0000000..........110.....0110011);
+    pattern AND_INST   =   mask(0000000..........111.....0110011);
+
+    pattern FENCE_INST  =   mask(0000........00000000000000001111);
+    pattern FENCEI_INST =   mask(00000000000000000001000000001111);    
+    
+    pattern SCALL_INST  =   mask(00000000000000000000000001110011);    
+    pattern SBREAK_INST =   mask(00000000000100000000000001110011);    
+    
+    pattern RDCYCLE_INST    =   mask(11000000000000000010.....1110011);
+    pattern RDCYCLEH_INST   =   mask(11001000000000000010.....1110011);
+    pattern RDTIME_INST     =   mask(11000000000100000010.....1110011);
+    pattern RDTIMEH_INST    =   mask(11001000000100000010.....1110011);
+    pattern RDINSTRET_INST  =   mask(11000000001000000010.....1110011);
+    pattern RDINSTRETH_INST =   mask(11001000001000000010.....1110011);
+    
+    //RV32M Standard Extension
+    pattern MUL_INST    =   mask(0000001..........000.....0110011);
+    pattern MULH_INST   =   mask(0000001..........001.....0110011);
+    pattern MULHSU_INST =   mask(0000001..........010.....0110011);
+    pattern MULHU_INST  =   mask(0000001..........011.....0110011);
+    pattern DIV_INST    =   mask(0000001..........100.....0110011);
+    pattern DIVU_INST   =   mask(0000001..........101.....0110011);
+    pattern REM_INST    =   mask(0000001..........110.....0110011);
+    pattern REMU_INST   =   mask(0000001..........111.....0110011);
+    
+    //RV32A Standard Extension
+    pattern LRW_INST      =   mask(00010..00000.....010.....0101111);
+    pattern SCW_INST      =   mask(00011............010.....0101111);
+    pattern AMOSWAPW_INST =   mask(00001............010.....0101111);
+    pattern AMOADDW_INST  =   mask(00000............010.....0101111);
+    pattern AMOXORW_INST  =   mask(00100............010.....0101111);
+    pattern AMOANDW_INST  =   mask(01100............010.....0101111);
+    pattern AMOORW_INST   =   mask(01000............010.....0101111);
+    pattern AMOMINW_INST  =   mask(10000............010.....0101111);
+    pattern AMOMAXW_INST  =   mask(10100............010.....0101111);
+    pattern AMOMINUW_INST =   mask(11000............010.....0101111);
+    pattern AMOMAXUW_INST =   mask(11100............010.....0101111);
+
+    //Register: [23:17-Reservado|16:13-ChannelIrqEnable|12:9-Reservado|8:5-ChannelEnable|4:3-Reservado|2:1-ChannelSel|0-On/Off]
+    external memory instrMemory (0x00,64) alias IMEM;
+    external register DeviceConfigurationRegister(0x00) alias DCR {
+        reserved [23:17];
+        CHANNELIRQENABLE {
+            RW IE_CHANNEL3 [16];
+            RW IE_CHANNEL2 [15];
+            RW IE_CHANNEL1 [14];
+            RW IE_CHANNEL0 [13];
+        };
+        reserved [12:9];
+        CHANNELENABLE {
+            RW E_CHANNEL3 [8];
+            RW E_CHANNEL2 [7];
+            RW E_CHANNEL1 [6];
+            RW E_CHANNEL0 [5];
+        };
+        reserved [4:3];
+        RW CHANNEL_SEL [2:1];
+        RW DEVICE_ENABLE [0];
+    }
+    
+    external register CHANNEL_TIME_SCALE(0x04) alias CTS {
+        reserved [31:2];
+        RW SCALE[1:0];
+    }
+     
+    external register CHANNEL_TIME_BOUNDARY(0x08) alias CTB {
+        RW TIME[31:0];
+    }
+    
+    external register CHANNEL_LAST_SIGNAL(0x0C) alias CLS {
+        reserved [31:4];
+        READ CHANNEL3 [3];
+        READ CHANNEL2 [2];
+        READ CHANNEL1 [1];
+        READ CHANNEL0 [0];
+    }
+    
+globalstate {
+
+    orthoregion PC_Counter {
+        initialstate INSTRUCTION_A {
+            addexitpoint(INSTRUCTION_A){
+                write(DCR.DEVICE_ENABLE) == DEVEN
+            }
+        }
+    }
+
+    addproperty(critical) {
+        ltlf(
+            []ABC
+        )
+    }
+  }
+}

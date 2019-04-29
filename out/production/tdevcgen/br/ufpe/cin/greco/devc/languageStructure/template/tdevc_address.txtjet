@@ -1,0 +1,36 @@
+<%@jet package="br.ufpe.cin.greco.devc.languageStructure.tdevctemplate" imports="br.ufpe.cin.greco.devc.languageStructure.* java.util.*" class="TDEVCAddress" %>
+<%
+TDCCheckerGenerator tdgen = (TDCCheckerGenerator)argument;
+String elfPath;
+ if (tdgen.getKernelImageDir().equals("")){
+ 	elfPath = tdgen.getAbsoluteDir() + "sw/" + tdgen.getAppName() + "/" + tdgen.getAppName() + ".x";
+ }else{
+ 	elfPath = tdgen.getKernelImageDir();
+ }
+%>
+#!/bin/bash
+echo
+echo "Removing address.h"
+rm address.h
+echo "Creating Address.h from application <%=tdgen.getAppName() + ".x"%>..."
+echo "<%="** Using OS Kernel Image: " + (tdgen.getKernelImageDir().equals("")?"[No]":("[Yes] -> " + tdgen.getKernelImageDir()))%>"
+echo \#ifndef _ADDRESS_H >> address.h
+echo \#define _ADDRESS_H >> address.h
+echo >> address.h
+echo //REGISTERS >> address.h
+echo >> address.h
+<%for (String string : tdgen.getRegisters().keySet()) {%>
+echo \#define <%=string.toUpperCase()%>_ADDR<%="\t\t0x" + Integer.toString(tdgen.getBaseAddress() + tdgen.getRegisters().get(string).getAddress(),16)%> >> address.h
+<%}%>
+echo >> address.h
+echo //TRIGGERS >> address.h
+echo >> address.h
+<%
+int i = 0;
+for (String service : tdgen.getServices().keySet()) {%>
+echo \#define <%=service.toUpperCase()%>_ADDR 0x0$(nm <%=elfPath%> | grep <%=service%> | cut -d ' ' -f1,1) >> address.h
+<%i++;
+}%>
+echo >> address.h
+echo \#endif >> address.h
+echo

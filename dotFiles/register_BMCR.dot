@@ -1,0 +1,24 @@
+digraph BMCR{
+node [shape = "record" 
+ style="filled" ];
+node0 [ label = "[0:6] RESERVED[--]"
+ fillcolor = "red"];
+node1 [ label = "[7] COLLISION_TEST[RW]"
+ fillcolor = "green"];
+node2 [ label = "[8] DUPLEXMODE[RW]"
+ fillcolor = "green"];
+node3 [ label = "[9] RESTART[RW]"
+ fillcolor = "green"];
+node4 [ label = "[10] ISOLATE[RW]"
+ fillcolor = "green"];
+node5 [ label = "[11] POWER_DN[RW]"
+ fillcolor = "green"];
+node6 [ label = "[12] AUTO_NEG_ENA[RW]"
+ fillcolor = "green"];
+node7 [ label = "[13] SPEEDSEL[RW]"
+ fillcolor = "green"];
+node8 [ label = "[14] LOOPBACK[RW]"
+ fillcolor = "green"];
+node9 [ label = "[15] RESET[RW]"
+ fillcolor = "green"];
+}

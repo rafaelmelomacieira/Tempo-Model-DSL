@@ -1,0 +1,340 @@
+<%@jet package="br.ufpe.cin.greco.devc.languageStructure.tdevctemplate" imports="br.ufpe.cin.greco.devc.languageStructure.* java.util.*" class="TDEVCAutomataSuperClass" %>
+<%
+//TDCCheckerGenerator tdgen = (TDCCheckerGenerator)argument;
+//Service service = tdgen.getCurrentService();
+%>
+//*************************************************************************\\
+//***********               tdc_automata.cpp      		***********\\
+//*************************************************************************\\
+//*************************************************************************\\
+//*********** 		        UFPE/Cin - Greco		***********\\
+//*********** 		 http://www.cin.ufpe.br/~greco 		***********\\
+//***********							***********\\
+//***********							***********\\
+//*********** 		    By Rafael Melo Macieira		***********\\
+//***********							***********\\
+//***********		    E-mail: rmm2@cin.ufpe.br		***********\\
+//*************************************************************************\\
+//*************************************************************************\\
+//**		 Automata Reference for the temporal check		 **\\
+//**	   	 VIRTUAL CLASS                                           **\\
+//*************************************************************************\\
+
+#include "headers/tdc_automata.h"
+//#include "tdc_automata.h"
+#include <stdio.h>
+#include <iostream>
+
+//################################ TDC_Automata #############################
+
+void TDC_Automata::printRejection(StateID stateID){};
+int TDC_Automata::checkState(StateID stateID){};
+int TDC_Automata::checkInitialState(){};
+TDC_Automata::StateID TDC_Automata::getNextState(StateID stateID){};
+std::string TDC_Automata::runStep(bool access_type, VarList* currentVarList, int* rError){};
+void TDC_Automata::refreshVariables(VarList* currentVarList){};
+void TDC_Automata::reset(){};
+
+TDC_Automata::TDC_Automata(char* name, unsigned int automataSteps){//, VarList mainVarList){
+  int i;
+  //unsigned int *realCoverage[automataSteps];
+  this->name = name;
+  this->end = false;
+  this->steps = automataSteps;
+  //this->coverage = realCoverage; 
+  for (i = 0;i<this->steps;i++){
+    this->coverage[i] = 0;
+  }
+};
+
+std::string TDC_Automata::int2string(unsigned int number){
+       std::ostringstream oss;
+       oss << number;
+       return oss.str();
+};
+
+void TDC_Automata::addCoverageCount(unsigned int index){
+  this->coverage[index]++;
+};
+
+void TDC_Automata::setCurrentVarList(VarList *var){
+	this->currentVarList = var;
+};
+
+VarList* TDC_Automata::getCurrentVarList(){
+	return this->currentVarList;
+};
+
+//################################## VARLIST ###############################
+
+VarList::VarList(unsigned int platformAddr, std::string name, unsigned int* var, bool readable, bool writable){
+    this->platformAddr = platformAddr;
+    this->var = var;
+    this->name = name;
+    //printf("\nInt Var: %p\n",var);
+    this->EOL = 1;
+    this->updated = 0;
+    this->readable = readable;
+    this->writable = writable;
+    resetBitLastValue();
+};
+
+short VarList::getPlatformWordLen(){
+	return PLATFORM_WORD_LEN;
+};
+
+void VarList::resetBitLastValue(){
+	int i;
+	for (i = 0; i>PLATFORM_WORD_LEN-1;i++){
+		bitLastValue[i] = 0;
+		bitUsageCounter[i] = 0;
+	}
+};
+
+void VarList::countBitUsage(unsigned int value){
+	int i = 0;
+	while (value > 1){
+		if (this->bitLastValue[i] != (value % 2)){
+			this->bitLastValue[i] = (value % 2);
+			bitUsageCounter[i]++;
+		}
+    	value >>= 1;
+    	i++;
+  	}
+  	if (this->bitLastValue[i] != value){
+  		this->bitLastValue[i] = (value);
+		this->bitUsageCounter[i]++;
+	}
+};
+
+void VarList::addNextVar(VarList* varList){
+    this->nextVar = varList;
+    this->EOL = 0;
+};
+
+VarList* VarList::getNextVar(){
+    return this->nextVar;
+};
+
+unsigned int* VarList::getVar(){
+    return this->var;
+};
+
+void VarList::setVar(unsigned int* var){
+    //printf("\nSetVat Pre: Atual: %p - Proposto: %p\n", this->var, var);
+    this->var = var;
+    countBitUsage(*var);
+    //printf("\nSetVat Pos: Atual: %p - proposto: %p\n", this->var, var);
+};
+
+unsigned int VarList::getReadVar(){
+	return this->read_var;
+};
+
+void VarList::setReadVar(unsigned int var){
+	this->update();
+	this->read_var = var;
+};
+
+bool VarList::isEOL(){
+    return this->EOL;
+};
+
+int VarList::isUpdated(){
+  return this->updated;
+};
+
+void VarList::update(){
+  this->updated = 1;
+  //if (this->platformAddr == 0x40000) std::cout << "UPDATE STATUS";
+};
+
+void VarList::undoUpdate(){
+  // std::cout << "Undo!!";
+  this->updated = 0;
+  //if (this->platformAddr == 0x40000) std::cout << "UNDO UPDATE STATUS";
+};
+
+bool VarList::isReadable(){
+	return this->readable;
+};
+
+bool VarList::isWritable(){
+	return this->writable;
+};
+
+void VarList::clearAllUpdate(VarList* mainVarList){
+  VarList* tempvar = mainVarList;
+  tempvar->undoUpdate();
+  if (!tempvar->isEOL()) {
+    VarList *next = tempvar->getNextVar();
+    while (!next->isEOL()) {
+      next->undoUpdate();
+      next = next->getNextVar();
+    }
+    next->undoUpdate();
+  }
+};
+
+unsigned int* VarList::getBitUsageCounter(){
+	return this->bitUsageCounter;
+};
+
+unsigned int VarList::getPlatformAddr(){
+    return this->platformAddr;
+};
+
+VarList* VarList::getVarListByPlatformAddr(VarList* mainVarList, unsigned int platformAddr) {
+    VarList* tempvar = mainVarList;
+    if (tempvar->isEOL()) {
+        //printf(" Eh EOF(%i)\n ",platformAddr);
+        //printf("mainint %p\n", &mainVarList);
+        //printf("\nRetorna 1 SO MAIN %p", tempvar);
+        return tempvar;
+    } else {
+        //printf(" !NAO Eh EOF(%i)\n ",platformAddr);
+        VarList *next = tempvar->getNextVar();
+        //printf("nextint %p\n", &mainVarList);
+        while (!next->isEOL()) {
+            if (tempvar->getPlatformAddr() == platformAddr) {
+                //printf("\nRetorna PRIM. MAIN %p", tempvar);
+                return tempvar;
+            } else {
+                tempvar = next;
+                next = next->getNextVar();
+            }
+        }
+        if (tempvar->getPlatformAddr() == platformAddr) {
+            //printf("\nRetorna MAIN %p", tempvar->getVar());
+            return tempvar;
+        } else {
+            //printf("\nRetorna NEXT %p", next->getVar());
+            return next;
+        }
+    }
+};
+
+bool VarList::contains(VarList* mainVarList, unsigned int platformAddr){
+    VarList* tempvar = mainVarList;
+    if (tempvar->isEOL()) {
+        //printf("Plataform Addr: %d = %d\n",mainVarList.getPlatformAddr(),platformAddr);
+        if (tempvar->getPlatformAddr() == platformAddr){
+            return 1;
+        }else{
+            return 0;
+        }
+    } else {
+        VarList *next = tempvar->getNextVar();
+        while (!next->isEOL()) {
+            if (tempvar->getPlatformAddr() == platformAddr) {
+                return 1;
+            } else {
+                tempvar = next;
+                next = next->getNextVar();
+            }
+        }
+        if (tempvar->getPlatformAddr() == platformAddr) {
+            return 1;
+        } else if (next->getPlatformAddr() == platformAddr) {
+            return 1;
+        }else{
+            return 0;
+        }
+    }
+};
+
+//################################## AUTOMATALIST ###############################
+
+AutomataList::AutomataList(unsigned int platformAddr, TDC_Automata* automata){
+  int i;
+  this->platformAddr = platformAddr;
+  this->automata = automata;
+  //printf("\nInt Var: %p\n",var);
+  this->EOL = 1;
+};
+
+void AutomataList::addNextAutomata(AutomataList* Automatalist){
+    this->nextAutomata = Automatalist;
+    this->EOL = 0;
+};
+
+AutomataList* AutomataList::getNextAutomata(){
+    return this->nextAutomata;
+};
+
+TDC_Automata* AutomataList::getAutomata(){
+    return this->automata;
+};
+
+void AutomataList::setAutomata(TDC_Automata* var){
+    //printf("\nSetVat Pre: Atual: %p - Proposto: %p\n", this->var, var);
+    this->automata = automata;
+    //printf("\nSetVat Pos: Atual: %p - proposto: %p\n", this->var, var);
+};
+
+bool AutomataList::isEOL(){
+    return this->EOL;
+};
+
+unsigned int AutomataList::getPlatformAddr(){
+    return this->platformAddr;
+};
+
+AutomataList* AutomataList::getAutomataListByPlatformAddr(AutomataList* mainAutomataList, unsigned int platformAddr) {
+    AutomataList* tempvar = mainAutomataList;
+    if (tempvar->isEOL()) {
+        //printf(" Eh EOF(%i)\n ",platformAddr);
+        //printf("mainint %p\n", &mainAutomataList);
+        //printf("\nRetorna 1 SO MAIN %p", tempvar);
+        return tempvar;
+    } else {
+        //printf(" !NAO Eh EOF(%i)\n ",platformAddr);
+        AutomataList *next = tempvar->getNextAutomata();
+        //printf("nextint %p\n", &mainAutomataList);
+        while (!next->isEOL()) {
+            if (tempvar->getPlatformAddr() == platformAddr) {
+                //printf("\nRetorna PRIM. MAIN %p", tempvar);
+                return tempvar;
+            } else {
+                tempvar = next;
+                next = next->getNextAutomata();
+            }
+        }
+        if (tempvar->getPlatformAddr() == platformAddr) {
+            //printf("\nRetorna MAIN %p", tempvar->getVar());
+            return tempvar;
+        } else {
+            //printf("\nRetorna NEXT %p", next->getVar());
+            return next;
+        }
+    }
+};
+
+bool AutomataList::contains(AutomataList* mainAutomataList, unsigned int platformAddr){
+    AutomataList* tempvar = mainAutomataList;
+    if (tempvar->isEOL()) {
+        //printf("Plataform Addr: %d = %d\n",mainAutomataList.getPlatformAddr(),platformAddr);
+        if (tempvar->getPlatformAddr() == platformAddr){
+            return 1;
+        }else{
+            return 0;
+        }
+    } else {
+        AutomataList *next = tempvar->getNextAutomata();
+        while (!next->isEOL()) {
+            if (tempvar->getPlatformAddr() == platformAddr) {
+                return 1;
+            } else {
+                tempvar = next;
+                next = next->getNextAutomata();
+            }
+        }
+        if (tempvar->getPlatformAddr() == platformAddr) {
+            return 1;
+        } else if (next->getPlatformAddr() == platformAddr) {
+            return 1;
+        }else{
+            return 0;
+        }
+    }
+};

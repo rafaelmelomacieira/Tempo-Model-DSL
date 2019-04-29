@@ -1,0 +1,5 @@
+digraph RX_IDLE{
+RX_IDLE[shape="Mdiamond"];
+RX_PRONTO -> RX_IDLE [label = "p2"];
+RX_IDLE -> RX_PRONTO [label = "p0 && p1"];
+}

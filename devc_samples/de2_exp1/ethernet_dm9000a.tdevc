@@ -1,0 +1,641 @@
+import ethernet_class;
+
+device (dm9000a) {
+    
+pattern RXNOERROR = mask(....0000);
+    
+    format txStatusfmt {
+        READ TJTO[7];
+        READ LOSSC[6];
+        READ NC[5];
+        READ LATEC[4];
+        READ COL[3];
+        READ EC[2];
+        reserved[1:0];
+    }
+    
+    format multicastAddrfmt {
+        RW MAB[7:0];
+    }
+    
+    format physicalAddrfmt {
+        RW PAB[7:0];
+    }
+    
+    external register indexReg(0x00) alias INDEXREG {
+        RW INDEX [15:0];
+    }
+
+    external register dataReg(0x04) alias DATAREG {
+        RW DATA [15:0];
+    }
+
+    internal IntRegsProt register networkStatusReg(0x00) alias NSR {
+        READ SPEED [7];
+        READ LINKST [6];
+        RW WAKEST [5];
+        reserved[4];
+        RW TX2END [3];
+        RW TX1END [2];
+        READ RXOV [1];
+        reserved[0];
+    }
+
+    internal IntRegsProt register networkControlReg(0x01) alias NCR {
+        reserved[7];
+        RW WAKEEN[6];
+        reserved[5];
+        RW FCOL[4];
+        READ FDX[3];
+        RW LBK[2:1];
+        RW RST[0];
+    }
+    
+    internal IntRegsProt register txControlReg(0x02) alias TCR {
+        reserved[7];
+        RW TJDIS[6];
+        RW EXCECM[5];
+        RW PAD_DIS2[4];
+        RW CRC_DIS2 [3];
+        RW PAD_DIS1 [2];
+        RW CRC_DIS1 [1];
+        RW TXREQ [0];
+    }
+    
+    internal IntRegsProt register txStatusRegI(0x03) alias TSRI = txStatusfmt;
+    
+    internal IntRegsProt register txStatusRegII(0x04) alias TSRII = txStatusfmt;
+
+    internal IntRegsProt register rxControlReg(0x05) alias RCR {
+        reserved[7];
+        RW WTDIS[6];
+        RW DIS_LONG[5];
+        RW DIS_CRC[4];
+        RW ALL[3];
+        RW RUNT[2];
+        RW PRMSC [1];
+        RW RXEN[0];
+    }
+    
+    internal IntRegsProt register rxStatusReg(0x06) alias RSR {
+        READ RF[7];
+        READ MF[6];
+        READ LCS[5];
+        READ RWTO[4];
+        READ PLE[3];
+        READ AE[2];
+        READ CE[1];
+        READ FOE[0];
+    }
+    
+    internal IntRegsProt register receiveOverflowCounterReg(0x07) alias ROCR {
+        READ RXFU[7];
+        READ ROC[6:0];
+    }
+    
+    internal IntRegsProt register backPressureThresholdReg(0x08) alias BPTR {
+        RW BPHW[7:4];
+        RW JPT[3:0];
+    } 
+
+    internal IntRegsProt register flowControlThresholdReg(0x09) alias FCTR {
+        RW HWOT[7:4];
+        LWOT {
+            RW AS[3];
+            RW AD[2];
+            RW AF[1];
+            RW AG[0];
+        };
+        //RW LWOT[3:0];
+    }
+    
+    internal IntRegsProt register rxtxFlowControlReg(0x0A) alias FCR {
+        RW TXP0[7];
+        RW TXPF[6];
+        RW TXPEN[5];
+        RW BKPA[4];
+        RW BKPM[3];
+        READ RXPS[2];
+        READ RXPCS[1];
+        RW FLCE[0];
+    }
+
+    internal IntRegsProt register multicastAddressReg7(0x1D) alias MAR7 = multicastAddrfmt;
+    internal IntRegsProt register multicastAddressReg6(0x1C) alias MAR6 = multicastAddrfmt;
+    internal IntRegsProt register multicastAddressReg5(0x1B) alias MAR5 = multicastAddrfmt;
+    internal IntRegsProt register multicastAddressReg4(0x1A) alias MAR4 = multicastAddrfmt;
+    internal IntRegsProt register multicastAddressReg3(0x19) alias MAR3 = multicastAddrfmt;
+    internal IntRegsProt register multicastAddressReg2(0x18) alias MAR2 = multicastAddrfmt;
+    internal IntRegsProt register multicastAddressReg1(0x17) alias MAR1 = multicastAddrfmt;
+    internal IntRegsProt register multicastAddressReg0(0x16) alias MAR0 = multicastAddrfmt;
+    
+    internal IntRegsProt register wakeUpControlReg(0x0F) alias WCR {
+        reserved[7:6];
+        RW LINKEN[5];
+        RW SAMPLEEN[4];
+        RW MAGICEN[3];
+        READ LINKST[2];
+        READ SAMPLEST[1];
+        READ MAGICST[0];
+    }
+    
+    internal IntRegsProt register physicalAddressRegister5(0x15) alias PAR5 = physicalAddrfmt;
+    internal IntRegsProt register physicalAddressRegister4(0x14) alias PAR4 = physicalAddrfmt;
+    internal IntRegsProt register physicalAddressRegister3(0x13) alias PAR3 = physicalAddrfmt;
+    internal IntRegsProt register physicalAddressRegister2(0x12) alias PAR2 = physicalAddrfmt;
+    internal IntRegsProt register physicalAddressRegister1(0x11) alias PAR1 = physicalAddrfmt;
+    internal IntRegsProt register physicalAddressRegister0(0x10) alias PAR0 = physicalAddrfmt;
+    
+    
+    internal IntRegsProt register generalPurposeControlReg(0x1E) alias GPCR {  
+        reserved[7];
+        READ GPC64[6:4];
+        RW GPC31[3:1];
+        reserved[0];
+    }
+    
+    internal IntRegsProt register generalPurposeReg(0x1F) alias GPR {
+        reserved[7];
+        RW GPO[6:4];
+        RW GPIO[3:1];
+        RW PHYPD[0];
+    }
+    
+    internal IntRegsProt register txSRAMReadPointerAddress(0x22) alias TRPA {
+        READ TRPAL[15:8];
+        READ TRPAH[7:0];
+    }
+    
+    internal IntRegsProt register rxSRAMWritePointerAddressByte(0x24) alias RWPA {
+        READ RWPAL[15:8];
+        READ RWPAH[7:0];
+    }
+
+    internal IntRegsProt register vendorID(0x28) alias VID {
+        READ VIDL[15:8];
+        READ VIDH[7:0];
+    }
+
+    internal IntRegsProt register productID(0x2A) alias PID {
+        READ PIDL[15:8];
+        READ PIDH[7:0];
+    }
+
+    internal IntRegsProt register CHIPRevision(0x2C) alias CHIPR {
+        READ CHIPR[7:0];
+    }
+
+    internal IntRegsProt register txControlRegII(0x2D) alias TCR2 {
+        RW LED[7];
+        RW RLCP[6];
+        RW DTU[5];
+        RW ONEPM[4];
+        RW IFGS[3:0];
+    }
+
+    internal IntRegsProt register operationTestControlReg(0x2E) alias OCR {
+        RW SCC[7:6];
+        reserved[5];
+        RW SOE[4];
+        RW SCS[3];
+        RW PHYOP[2:0];
+    }
+
+    internal IntRegsProt register specialModeControlReg(0x2F) alias SMCR {
+        RW SM_EN[7];
+        reserved[6:3];
+        RW FLC[2];
+        RW FB1[1];
+        RW FB0[0];
+    }
+
+    internal IntRegsProt register earlyTransmitControl_StatusReg(0x30) alias ETXCSR {
+        RW ETE[7];
+        READ ETS2[6];
+        READ ETS1[5];
+        reserved[4:2];
+        RW ETT[1:0];
+    }
+
+    internal IntRegsProt register transmitCheckSumControlReg(0x31) alias TCSCR {
+       reserved[7:3];
+       RW UDPCSE[2];
+       RW TCPCSE[1];
+       RW IPCSE[0];
+    }
+
+    internal IntRegsProt register receiveCheckSumControlStatusReg(0x32) alias RCSCSR {
+        READ UDPS[7];
+        READ TCPS[6];
+        READ IPS[5];
+        READ UDPP[4];
+        READ TCPP[3];
+        READ IPP[2];
+        RW RCSEN[1];
+        RW DCSE[0];
+    }
+    
+    internal IntRegsProt register memoryDataPre_FetchReadCommandWithoutAddressIncrementReg(0xF0) alias MRCMDX {
+        READ MRCMDX[7:0];
+    }
+
+    internal IntRegsProt register memoryDataReadCommandWithAddressIncrementRegI(0xF1) alias MRCMDX1 {
+        READ MRCMDX1[7:0];
+    }
+
+    internal IntRegsProt register memoryDataReadCommandWithAddressIncrementRegII(0xF2) alias MRCMD {
+        READ MRCMD[7:0];
+    }
+
+    internal IntRegsProt register memoryDataRead_addressRegister(0xF4) alias MRR {
+        RW MDRAL[15:8];
+        RW MDRAH[7:0];
+    }
+
+    internal IntRegsProt register memoryDataWriteCommandWithoutAddressIncrementReg(0xF6) alias MWCMDXR {
+        WRITE MWCMDX[7:0];
+    }
+
+    internal IntRegsProt register memoryDataWriteCommandWithAddressIncrementReg(0xF8) alias MWCMDR {
+        WRITE MWCMD[7:0];
+    }
+
+    internal IntRegsProt register memoryDataWrite_addressRegs(0xFA) alias MWR {
+        RW MDWAL[15:8];
+        RW MDWAH[7:0];
+    }
+
+    internal IntRegsProt register txPacketLengthLowReg(0xFC) alias MDRALR {
+        RW MDRAL[7:0];
+    }
+    
+    internal IntRegsProt register txPacketLengthHighReg(0xFD) alias MDRAHR {
+        RW MDRAH[7:0];
+    }
+    
+    internal IntRegsProt register interruptStatusReg(0xFE) alias ISR {
+        READ IOMODE[7];
+        reserved[6];
+        RW LNKCHG[5];
+        RW UDRUN[4];
+        RW ROO[3];
+        RW ROS[2];
+        RW PT[1];
+        RW PR[0];
+    }
+    
+    internal IntRegsProt register interruptMaskReg(0xFF) alias IMR {
+        RW PAR[7];
+        reserved[6];
+        RW LNKCHGI[5];
+        RW UDRUNI[4];
+        RW ROOI[3];
+        RW ROI[2];
+        RW PTI[1];
+        RW PRI[0];
+    }
+    
+    internal IntRegsProt register EEPROM_PHYControlReg(0x0B) alias EPCR {
+        reserved[7:6];
+        RW REEP[5];
+        RW WEP[4];
+        RW EPOS[3];
+        RW ERPRR[2];
+        RW ERPRW[1];
+        READ ERRE[0];
+    }
+    
+    internal IntRegsProt register EEPROM_PHYAddressReg(0x0C) alias EPAR {
+        RW PHY_ADR[7:6];
+        RW EROA[5:0];
+    }
+
+    internal IntRegsProt register EEPROM_PHYDataReg(0x0D) alias EPDR {
+        RW EE_PHY_H[15:8];
+        RW EE_PHY_L[7:0];
+    }
+    
+    internal ProtPHYRegs register BasicModeControl(0x00) alias BMCR {
+        RW RESET[15];
+        RW LOOPBACK[14];
+        RW SPEEDSEL[13];
+        RW AUTO_NEG_ENA[12];
+        RW POWER_DN[11];
+        RW ISOLATE[10];
+        RW RESTART[9];
+        RW DUPLEXMODE[8];
+        RW COLLISION_TEST[7];
+        reserved[6:0];
+    }
+    //interrupt irq;
+
+    /*mapping IntRegsProt {
+		address: INDEXREG;
+	    data: DATAREG;
+	}*/
+	
+	/*mapping ProtPHYRegs {
+		address: EPAR.REGADDR;
+	    data: {EE_PHY_H;EE_PHY_L}
+
+	    addrequirement {
+		   EPAR.PHYADDR = 0x01;
+	    }
+	
+	    addreadrequirement{
+		   EPCR = 0x0C;
+	    }
+	
+	    addwriterequirement{
+		   EPCR = 0x0A;
+	    }
+	}*/
+
+    /*mapping ProtEEPROMRegs {
+		address: EPAR.REGADDR;
+	    data: {EE_PHY_H;EE_PHY_L}
+
+	    addrequirement {
+		   EPAR.PHYADDR = 0x00;
+	    }
+	
+	    addreadrequirement{
+		   EPCR = 0x0C;
+	    }
+	
+	    addwriterequirement{
+		   EPCR = 0x0A;
+	    }
+	}*/
+
+var t1 = 1;
+var rxlowlen;
+var pkgcounter;
+var rxlen;
+var txlen;
+
+globalstate {
+   
+//***************************[LINK MODE]******************************
+    
+    orthoregion linkState {
+        initialstate DOWN {
+            addexitpoint(UP){
+                read(NSR.LINKST) == 1
+            }
+        }
+        state UP {
+            addexitpoint(DOWN){
+                read(NSR.LINKST) == 0
+            }
+        }
+    }
+
+    //***************************[OPER MODE]******************************
+    orthoregion ethOperationMode {
+	    initialstate UNDEF_OPER_MODE {
+	        addexitpoint(OPER16BITS){
+	            ISR.IOMODE == 0 
+	        }
+	        addexitpoint(OPER8BITS){
+	            ISR.IOMODE == 1
+	        }
+	    }
+	    
+	    state OPER16BITS {
+	        addexitpoint(OPER8BITS){
+	            ISR.IOMODE == 1
+	        }
+	    }
+	    
+	    state OPER8BITS {
+	        addexitpoint(OPER16BITS){
+	            ISR.IOMODE == 0
+	        }
+	    }
+    }
+    
+    //********************************************************************
+    
+    orthoregion PHYLayerOperation {
+		initialstate PHYDN {
+		    addexitpoint(PHYUP){write(GPR.PHYPD) == 0}
+            addexitpoint(PHYUP){write(BMCR.POWER_DN) == 0}
+            addexitpoint(SWRST){write(BMCR.SPEEDSEL) == 0}//NAO PODE
+	        addentrypoint {write(BMCR.POWER_DN) == 1}
+            addentrypoint {write(GPR.PHYPD) == 1}
+		}
+		
+		state SWRST {
+		    addentrypoint {write(NCR.RST) == 1}
+		}
+		
+		state PHYUP {        
+            orthoregion transmissionConfig {
+		        initialstate TXWRPKGIDLE {   
+		            addexitpoint(TXWRPKGWR) {
+		                write(MWCMDR)
+		            }
+		            /*addexitpoint(TXWRPKGLEN) {
+		                write(MDRALR) || write(MDRAHR)
+		            }*/
+		        }
+		      
+		        state TXWRPKGWR {
+		            addexitpoint(TXWRPKGLEN) {
+		                write(MDRALR) || write(MDRAHR)
+		            }
+		        }
+		
+		        state TXWRPKGLEN {
+		            addexitpoint(TXWRPKGIDLE) {
+		                    write(TCR.TXREQ) == 1
+		                }            
+		        }
+            }
+	        orthoregion transmissionExec {         
+		        initialstate TXSDPKGIDLE {
+		            addexitpoint(TXSDPKGSDING) {
+		                    write(TCR.TXREQ) == 1
+		            }
+                    addexitpoint(TXSDPKGSDING){write(TCR.TXREQ) == 0}//PODE ... REMOVER
+                    addexitpoint(TXSDPKGSDING){write(CHIPR) == RXNOERROR}//NAO PODE
+                    addexitpoint(TXSDPKGSDING){write(CHIPR) == 32}//NAO PODE
+		        }
+		        state TXSDPKGSDING {
+		            addexitpoint(TXSDPKGSDING) {
+		                    read(NSR.TX1END) == 1 || read(NSR.TX2END) == 1
+		                }
+                    addexitpoint(TXSDPKGIDLE){read(NSR) == t1 - 1}//nao pode
+		        }
+	        }
+	        
+            orthoregion receive {
+	        //Reception
+		        initialstate RXPKGIDLE {
+                    /*orthoregion dumbRead {
+                        initialstate firstByte {
+                            addexitpoint(secondByte) {
+		                      read(MRCMDREG)
+                            }
+                        }
+                        state secondByte {
+                            addexitpoint(thirdByte) {
+		                      read(MRCMDREG)
+                            }
+                        }
+                        state thirdByte {
+                            addexitpoint(fourthByte) {
+		                      read(MRCMDREG)
+                            }
+                        }
+                        state fourthByte {
+                            addexitpoint(RXPKGSTATUS) {
+		                      read(MRCMDREG) == 0x01
+		                    }
+		                    addexitpoint(RXPKGIDLE) {
+		                      read(MRCMDREG) == 0x00
+		                    }
+		                    addexitpoint(RXPKGHEADERERR) {
+		                      read(MRCMDXREG) != 0x00 && read(MRCMDXREG) != 0x01
+				            }
+                        }
+             
+                    }*/
+		            addexitpoint(RXPKGSTATUS) {
+		                    read(MRCMD) == 0x01
+		            }//Rever
+		            addexitpoint(RXPKGIDLE) {
+		                    read(MRCMD) == 0x00
+		            }
+		            addexitpoint(RXPKGHEADERERR) {
+		                    read(MRCMDX) != 0x00 && read(MRCMDX) != 0x01
+		            }
+		        }
+		        state RXPKGSTATUS {
+		            addexitpoint(RXPKGLOWLEN) {
+		                    read(MRCMD) == RXNOERROR
+		            }
+		        }
+		                
+		        state RXPKGLOWLEN {
+		            addexitpoint(RXPKGHIGHLEN) {
+		                    read(MRCMD)
+				            /*assigns{
+				      	       rxlowlen = MRCMDREG;
+			                }*/
+		            }
+		        }
+		        
+		        state RXPKGHIGHLEN {
+		            addexitpoint(RXPKGPAYLOAD) {
+		                    read(MRCMD)
+		        		    //assigns{
+				              	//rxlen = (MRCMDREG << 8) + rxlowlen;
+					            //pkgcounter = 0;
+				            //} 
+		            }
+		        }
+		        
+		        state RXPKGPAYLOAD {
+		            addexitpoint(RXPKGPAYLOAD) {
+		                    read(MRCMD) && pkgcounter < rxlen
+				            /*assigns{
+				    	        pkgcounter = pkgcounter + 1;
+		           		    }*/
+		            }
+		            
+		            addexitpoint(RXPKGPAYLOAD) {
+		                    read(MRCMDX) && pkgcounter < rxlen
+		            }
+		
+		            addexitpoint(RXPKGSTATUS) {
+		                    (read(MRCMDX) == 0x01 || read(MRCMD) == 0x01) && pkgcounter == rxlen
+		            }    
+		
+		            addexitpoint(RXPKGIDLE) {
+		                    (read(MRCMDX) == 0x00 || read(MRCMD) == 0x00) && pkgcounter == rxlen
+		            }
+		            
+		            addexitpoint(RXPKGHEADERERR) {
+		                    (read(MRCMD) != 0x00 && read(MRCMDX) != 0x01) && pkgcounter == rxlen
+		            }
+			    
+		        }
+		        
+		        state RXPKGHEADERERR {
+		            addexitpoint(RXPKGHEADERERR) {
+		                    read(MRCMDX) || read(MRCMD)
+		            }
+		        }
+	        }
+	        //*****************************************
+	        
+	        addproperty(critical) UndefinedOperMode {
+	            ltlf([](~UNDEF_OPER_MODE))
+	        }
+	        
+	        addproperty(critical) WriteBeforeLen {
+	            ltlf(
+                    []((write(MDRALR) || write(MDRAHR)) -> ~TXWRPKGIDLE)
+	                )
+	            }
+	        addproperty(critical) LenBeforeSend {
+	            ltlf(
+	                ~TXSDPKGSDING U TXWRPKGLEN
+	                )
+	            }
+	        addproperty(critical) NeverLenAndSend {
+	            ltlf(
+	                []( ~(TXSDPKGSDING && TXWRPKGLEN) )
+	                )
+	            }
+            addproperty(critical) TXLenPPT {
+                   ltlf(
+                     [](TXSDPKGSDING -> ((OPER16BITS -> ((txlen == txpkgcounter) || (txlen == txpkgcounter-1))) && (OPER8BITS -> (txlen == txpkgcounter))))
+                   )
+            }
+            addbehavior(fullduplex) fullduplex  {
+                ltlf(
+                    <>(TXSDPKGSDING && RXPKGPAYLOAD)
+                )
+            }
+	      }
+        }
+    
+    addproperty(critical) UndefOperMode {
+       ltlf(
+          [](PHYUP -> ~UNDEF_OPER_MODE)
+           )
+    }
+    addproperty(warning) PromiscuousMode {
+       ltlf(
+          [](RCR.PRMSC != 1)
+           )
+    }
+    addproperty(critical) ForceResetAndStopReadingOnRXError {
+            ltlf(
+                [](RXPKGHEADERERR -> read(MRCMD))
+            )
+    }
+    
+    addbehavior(conectionup) linkStateUp {
+            ltlf(
+                <>UP
+            )
+    }
+    
+    addproperty(warning) rxtxinterruption {
+        ltlf(
+            [](PHYUP -> (!(TXWRPKGIDLE && TXSDPKGIDLE && RXPKGIDLE) -> !(write(BMCR.POWERDN) == 1 || write(GPR.PHYPD) == 1)))
+        )
+    }
+    
+    addproperty(warning) teste{
+        ltlf(
+            !([](PHYUP && PHYDN) && <>(!PHYUP || !PHYDN))
+        )
+    }
+    
+  }
+}

@@ -1,0 +1,32 @@
+digraph status{
+node [shape = "record" 
+ style="filled" ];
+node0 [ label = "[0] PE[RW]"
+ fillcolor = "green"];
+node1 [ label = "[1] FE[RW]"
+ fillcolor = "green"];
+node2 [ label = "[2] BRK[RW]"
+ fillcolor = "green"];
+node3 [ label = "[3] ROE[RW]"
+ fillcolor = "green"];
+node4 [ label = "[4] TOE[RW]"
+ fillcolor = "green"];
+node5 [ label = "[5] TMT[RO]"
+ fillcolor = "yellow"];
+node6 [ label = "[6] TRDY[RO]"
+ fillcolor = "yellow"];
+node7 [ label = "[7] RRDY[RO]"
+ fillcolor = "yellow"];
+node8 [ label = "[8] E[RW]"
+ fillcolor = "green"];
+node9 [ label = "[9] RESERVED[--]"
+ fillcolor = "red"];
+node10 [ label = "[10] DCTS[RW]"
+ fillcolor = "green"];
+node11 [ label = "[11] CTS[RW]"
+ fillcolor = "green"];
+node12 [ label = "[12] EOP[RO]"
+ fillcolor = "yellow"];
+node13 [ label = "[13:15] RESERVED[--]"
+ fillcolor = "red"];
+}

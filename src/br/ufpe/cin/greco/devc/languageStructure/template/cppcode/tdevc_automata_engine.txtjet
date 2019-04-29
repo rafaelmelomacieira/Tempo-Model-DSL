@@ -1,0 +1,291 @@
+<%@jet package="br.ufpe.cin.greco.devc.languageStructure.tdevctemplate" imports="br.ufpe.cin.greco.devc.languageStructure.* br.ufpe.cin.greco.devc.languageStructure.type.* java.util.*" class="TDEVCAutomataEngine" %>
+<%TDCCheckerGenerator tdgen = (TDCCheckerGenerator)argument;
+Register reg;
+String read = "false", write = "false";%>
+//*************************************************************************\\
+//***********               tdc_automata_engine.cpp    		***********\\
+//*************************************************************************\\
+//*************************************************************************\\
+//*********** 		        UFPE/Cin - Greco		***********\\
+//*********** 		 http://www.cin.ufpe.br/~greco 		***********\\
+//***********							***********\\
+//***********							***********\\
+//*********** 		    By Rafael Melo Macieira		***********\\
+//***********							***********\\
+//***********		    E-mail: rmm2@cin.ufpe.br		***********\\
+//*************************************************************************\\
+//*************************************************************************\\
+//**		 Automata Reference for the temporal check		 **\\
+//**	   	 Automatas Configuration Class                           **\\
+//*************************************************************************\\
+
+
+#include "headers/tdc_automata_engine.h"
+#include "headers/address.h"
+/*#include "tdc_automata_engine.h"
+#include "address.h"*/
+#include <stdio.h>
+#include <iostream>
+
+using namespace std;
+
+TDC_Automata_Engine::TDC_Automata_Engine(){
+	
+<%
+int i = 0;
+for (String string : tdgen.getRegisters().keySet()) {%>
+	unsigned int* var<%=i%>;
+<%  i++;
+}
+i=0;
+for (String string : tdgen.getRegisters().keySet()) {
+	reg = tdgen.getRegisters().get(string);
+	read = (reg.getType()==AccessType.READ || reg.getType()==AccessType.READ_WRITE)?"true":"false";
+	write = (reg.getType()==AccessType.WRITE || reg.getType()==AccessType.READ_WRITE)?"true":"false";%>
+	VarList *vl<%=i%> = new VarList(<%=string.toUpperCase()%>_ADDR, "<%=string.toUpperCase()%>",var<%=i%>,<%=read%>,<%=write%>);
+<%  i++;
+}
+i=0;
+for (String string : tdgen.getServices().keySet()) {%>
+	TDC_Automata *aut<%=i%> = new TDC_Automata_<%=string%>(vl0);
+	AutomataList *al<%=i%> = new AutomataList(<%=string.toUpperCase()%>_ADDR, aut<%=i%>);
+<%
+	i++;
+}
+for (i = 0;i<tdgen.getServices().keySet().size()-1;i++){%>
+	al<%=i%>->addNextAutomata(al<%=i+1%>);
+<%}
+
+for (i = 0;i<tdgen.getRegisters().keySet().size()-1;i++){%>
+	vl<%=i%>->addNextVar(vl<%=i+1%>);
+<%}%> 
+
+    this->runStepNow = 0;
+    this->isLastRead = false;
+    //this->currentAutomata = new TDC_Automata_drv_init(vl1);
+    this->mainVarList = vl0;
+    this->mainAutomataList = al0;
+};
+
+
+void TDC_Automata_Engine::checkThisVar(unsigned int platformAddr){
+	std::string msg;
+	int rError = 0;
+    this->runStepNow = 0;
+	tmpReadedPlatformAddr = platformAddr;
+	bool ret = this->mainVarList->contains(this->mainVarList, platformAddr);
+	if (ret) {
+		this->runStepNow = 1;
+		this->currentVarList = mainVarList->getVarListByPlatformAddr(mainVarList, platformAddr);
+		//std::cout << "\nAddress Permitido: " << std::hex << platformAddr << " REG: " <<  this->currentVarList->name << "\n";
+	} else {
+		ret = this->mainAutomataList->contains(this->mainAutomataList,platformAddr);
+		if (ret) {
+			if (isLastRead) {
+				msg = internalRunStep(0, lastReadedData, &rError);
+				isLastRead = false;
+			}
+			if (this->inAutomata) {
+				if (this->currentAutomata->end == false) {
+					std::cout << "** [TemporalDevC] Warning :: Another function called before the end of the current function! Address[" << hex << platformAddr << "] function[" << mainAutomataList->getAutomataListByPlatformAddr(mainAutomataList, platformAddr)->getAutomata()->name << "]\n" << endl;
+				} else {
+					this->currentAutomata = mainAutomataList->getAutomataListByPlatformAddr(mainAutomataList, platformAddr)->getAutomata();
+					//std::cout << "\nCHAMOU METODO! no Endereco: " << std::hex << platformAddr << " Aut: " << this->currentAutomata->name << "\n";
+					this->currentAutomata->reset();
+					this->mainVarList->clearAllUpdate(mainVarList);
+				}
+			} else {
+				this->inAutomata = true;
+				this->currentAutomata = mainAutomataList->getAutomataListByPlatformAddr(mainAutomataList, platformAddr)->getAutomata();
+				//std::cout << "\nCHAMOU METODO! ja fora no Endereco: " << std::hex << platformAddr << " Aut: " << this->currentAutomata->name <<  "\n";
+				this->currentAutomata->reset();
+				this->mainVarList->clearAllUpdate(mainVarList);
+			}
+		}
+	}
+};
+
+void TDC_Automata_Engine::runStep(bool access_type, unsigned int data){
+	std::string msg;
+	int rError = 0;
+	if (this->inAutomata)
+		if (this->currentAutomata->end) {
+			//std::cout << "\nNO FIM!";
+			this->inAutomata = false;
+		}
+	if (this->runStepNow) {
+		if (this->inAutomata) {
+			if (access_type == 0) {
+				if (isLastRead) {
+					//*tmpCurrentVarList = *currentVarList;
+					currentVarList = mainVarList->getVarListByPlatformAddr(mainVarList, lastReadedPlatformAddr);
+					msg = internalRunStep(0, lastReadedData, &rError);
+				}
+				isLastRead = true;
+				lastReadedPlatformAddr = tmpReadedPlatformAddr;
+				lastReadedData = data;
+			} else {
+				//std::cout << "ESCRITA!";
+				msg = internalRunStep(1, data, &rError);
+				isLastRead = false;
+			}
+			//
+			//msg = internalRunStep(access_type, data, &rError);
+			if (rError == 1) {
+				this->inAutomata = false;
+				rError = false;
+				std::cout << msg << "\n";
+			}
+		} else {
+			std::cout << "Valor Hex: " << std::hex << data << " | Valor Dec: " << std::dec << data << std::endl;
+			std::cout << "** [TemporalDevC] Warning :: running writes after a function end or in a function out of verification!\n";
+		}
+	}
+};
+
+std::string TDC_Automata_Engine::internalRunStep(bool access_type, unsigned int data, int* rError){
+	std::string retorno;
+  if (access_type == false){
+	  if (!(currentVarList->isReadable())){
+		  *rError = 1;
+		  return currentVarList->name + " register is not readable!";
+	  }
+    //std::cout << " - Valor lido: " << std::dec << data;
+    this->currentVarList->update();
+    this->currentVarList->setReadVar(data);
+  }else{
+	if (!(currentVarList->isWritable())){
+		*rError = 1;
+		return currentVarList->name + " register is not writable!";
+	}
+  }
+  this->currentVarList->setVar(&data);
+  this->currentAutomata->setCurrentVarList(this->currentVarList);
+  std::cout << "Valor Hex: " << std::hex << data << " | Valor Dec: " << std::dec << data << std::endl; 
+  retorno = this->currentAutomata->runStep(access_type, this->mainVarList, rError); //MUDAR PARA ATUALIZAR SOMENTE UMA VARIAVEL!!! BY ADDR
+  printReport();
+  return retorno;
+};
+void TDC_Automata_Engine::printReport(){
+	ofstream reportFile;
+	reportFile.open("tdc_report.log", ofstream::out);// | ofstream::app);
+	reportFile << "=============================================\n";
+    reportFile << "==========       Flow Coverage      =========\n";
+    reportFile << "=============================================\n";
+	printFlowReport(&reportFile);
+	reportFile << "\n";
+    reportFile << "#############################################\n";
+    reportFile << "\n";
+    reportFile << "=============================================\n";
+    reportFile << "==========       Data Coverage      =========\n";
+    reportFile << "=============================================\n";
+    reportFile << "\n";
+	printDataReport(&reportFile);
+	reportFile.flush();
+  	reportFile.close();
+};
+
+void TDC_Automata_Engine::printDataReport(ofstream *reportFile){
+	int i;
+	VarList* curVar = this->mainVarList; //name
+	VarList* nextVar;
+	unsigned int *bitUsage;
+	
+	if (!curVar->isEOL()){
+		nextVar = curVar->getNextVar();
+		while (!nextVar->isEOL()){
+			*reportFile << "\n\n\n** Register: " << curVar->name << "\n\n";
+			bitUsage = curVar->getBitUsageCounter();
+			for (i = curVar->getPlatformWordLen()-1; i>=0; i--){
+				*reportFile << "[";
+				if (i < 10) *reportFile << "0";
+				*reportFile << i; 
+				*reportFile << "] " << "->" << " " << bitUsage[i] << "\n";
+			}
+			curVar = nextVar;
+			nextVar = curVar->getNextVar();
+		}
+		*reportFile << "\n\n\n** Register: " << nextVar->name << "\n\n";
+		bitUsage = nextVar->getBitUsageCounter();
+		for (i = nextVar->getPlatformWordLen()-1; i>=0; i--){
+			*reportFile << "[";
+			if (i < 10) *reportFile << "0";
+			*reportFile << i; 
+			*reportFile << "] " << "->" << " " << bitUsage[i] << "\n";
+		}
+	}else{
+		*reportFile << "\n\n\n** Register: " << curVar->name << "\n\n";
+		bitUsage = curVar->getBitUsageCounter();
+		for (i = curVar->getPlatformWordLen()-1; i>=0; i--){
+			*reportFile << "[";
+			if (i < 10) *reportFile << "0";
+			*reportFile << i; 
+			*reportFile << "] " << "->" << " " << bitUsage[i] << "\n";
+		}
+	}
+};
+
+void TDC_Automata_Engine::printFlowReport(ofstream *reportFile){
+  //ofstream reportFile;
+  unsigned int i;
+  AutomataList *next;
+  bool automataCoverage = false;
+  unsigned int globalCoverageCount = 0;
+  unsigned int coverageTotal = 0;
+  unsigned int runTotal = 0;
+  //reportFile.open("tdc_report.log", ofstream::out);// | ofstream::app);
+  *reportFile << "===========================\n";
+  *reportFile << "Services not covered\n";
+  *reportFile << "===========================\n";
+  globalCoverageCount = globalCoverageCount + mainAutomataList->automata->steps;
+  for (i = 0; i<mainAutomataList->automata->steps;i++){
+    if (mainAutomataList->automata->coverage[i] > 0){
+      coverageTotal++;
+      automataCoverage = true;
+    }
+    runTotal = runTotal + mainAutomataList->automata->coverage[i];
+  }
+  if (!automataCoverage) *reportFile << mainAutomataList->automata->name << "\n";
+  automataCoverage = false;
+  if (!mainAutomataList->isEOL()){
+    next = mainAutomataList->getNextAutomata();
+    while (!next->isEOL()) {
+      globalCoverageCount = globalCoverageCount + next->automata->steps;
+      for (i = 0; i<next->automata->steps;i++){
+	if (next->automata->coverage[i] > 0){
+	  coverageTotal++;
+	  automataCoverage = true;
+	}
+	runTotal = runTotal + next->automata->coverage[i];
+      }
+      if (!automataCoverage) *reportFile << next->automata->name << "\n";
+      automataCoverage = false;
+
+      next = next->getNextAutomata();
+    }
+    globalCoverageCount = globalCoverageCount + next->automata->steps;
+    for (i = 0; i<next->automata->steps;i++){
+      if (next->automata->coverage[i] > 0){
+	coverageTotal++;
+	automataCoverage = true;
+      }
+      runTotal = runTotal + next->automata->coverage[i];
+    }
+    if (!automataCoverage) *reportFile << next->automata->name << "\n";
+  }
+  *reportFile << "===========================\n";
+  *reportFile << "Total Steps: " << globalCoverageCount << "\n";
+  if (globalCoverageCount == 0){
+  	*reportFile << "Total Steps Covered: " << coverageTotal << "(0%)\n";
+  }else{
+  	*reportFile << "Total Steps Covered: " << coverageTotal << "(" << (coverageTotal * 100) / globalCoverageCount << "%)\n";
+  }
+  *reportFile << "Total Runs: " << runTotal << "\n";
+  *reportFile << "===========================\n";
+  //reportFile.flush();
+  //reportFile.close();
+};
+
+int TDC_Automata_Engine::isVarToCheck(unsigned int platformAddr){
+};
+        

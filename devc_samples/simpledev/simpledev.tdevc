@@ -1,0 +1,54 @@
+device (simpledev) {
+    
+    pattern INST_LUI   =   mask(.........................0110111);
+    
+        
+    //Register: [23:17-Reservado|16:13-ChannelIrqEnable|12:9-Reservado|8:5-ChannelEnable|4:3-Reservado|2:1-ChannelSel|0-On/Off]
+    external memory instrMemory (0x00,64) alias IMEM;
+    external register REGA(0x00) alias A {
+        reserved [23:17];
+        CHANNELIRQENABLE {
+            RW IE_CHANNEL3 [16];
+            RW IE_CHANNEL2 [15];
+            RW IE_CHANNEL1 [14];
+            RW IE_CHANNEL0 [13];
+        };
+        reserved [12:9];
+        CHANNELENABLE {
+            RW E_CHANNEL3 [8];
+            RW E_CHANNEL2 [7];
+            RW E_CHANNEL1 [6];
+            RW E_CHANNEL0 [5];
+        };
+        reserved [4:3];
+        RW CHANNEL_SEL [2:1];
+        RW DEVICE_ENABLE [0];
+    }
+    
+    external register CHANNEL_TIME_SCALE(0x04) alias CTS {
+        reserved [31:2];
+        RW SCALE[1:0];
+    }
+    
+globalstate {
+
+    orthoregion O1 {
+        initialstate SA {
+            addexitpoint(SB){
+                write(A.CHANNELENABLE.E_CHANNEL3) == 1
+            }
+        }
+        state SB {
+            addexitpoint(SA){
+                write(A.CHANNELENABLE.E_CHANNEL0) == 1
+            }
+        }
+    }
+
+    addproperty(critical) {
+        ltlf(
+            [](!(A.CHANNELENABLE.E_CHANNEL0 == 1 && A.CHANNELENABLE.E_CHANNEL1 == 1))
+        )
+    }
+  }
+}

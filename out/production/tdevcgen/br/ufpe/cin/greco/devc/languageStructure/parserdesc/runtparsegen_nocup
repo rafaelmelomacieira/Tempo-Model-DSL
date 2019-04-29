@@ -1,0 +1,5 @@
+rm ../devc/*.java
+jflex -d ../devc/ tdevc_lex_java.y
+java -cp $1 java_cup.Main -progress -package languageStructure.devc tdevc_java.y
+cp sym.java parser.java ../devc/
+rm *.java

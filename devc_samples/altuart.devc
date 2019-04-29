@@ -1,0 +1,81 @@
+DEVC(altuart){
+
+    dc_format data_param_fmt = "%data:8";
+    
+    dc_service <VOID> init; 
+    //dc_service <data_param_fmt,WRITE> send_data;
+    dc_service <VOID> send_data;
+    //dc_service <data_param_fmt,READ> receive_data;
+    dc_service <VOID> receive_data;
+    dc_service <VOID> altera_uart_tx_chars;
+    dc_service <VOID> altera_uart_dx_chars;
+    
+    dc_format rtxdata_fmt = "%RESERVED:8%data:8%MASK:'.......................0........'";
+    dc_format status_fmt = "%RESERVED:2%eop:1%cts:1%dcts:1%RESERVED:1%e:1%rrdy:1%trdy:1%tmt:1%toe:1%roe:1%brk:1%fe:1%pe:1%MASK:'......................0.........'";
+    dc_format control_fmt = "%RESERVED:2%ieop:1%rts:1%idcts:1%trbk:1%ie:1%irrdy:1%itrdy:1%itmt:1%itoe:1%iroe:1%ibrk:1%ife:1%ipe:1%MASK:'......................0.........'";
+    dc_format divisor_fmt = "%divisor:16";
+
+    dc_reg <rtxdata_fmt,READ> rxdata_reg;
+    dc_reg <rtxdata_fmt,WRITE> txdata_reg;
+    dc_reg <status_fmt,RW> status_reg;
+    dc_reg <control_fmt,RW> control_reg;
+    dc_reg <divisor_fmt,RW> divisor_reg;
+    dc_reg <rtxdata_fmt,RW> endofpkt_reg;
+
+    dc_drv_map rm {
+        rxdata = rxdata_reg.data;
+        txdata = txdata_reg.data;
+        status = status_reg.eop + status_reg.cts + status_reg.dcts + status_reg.e + status_reg.rrdy + status_reg.trdy
+                 + status_reg.tmt + status_reg.toe + status_reg.roe + status_reg.brk + status_reg.fe + status_reg.pe;
+        control = control_reg.ieop +control_reg.rts +control_reg.idcts +control_reg.trbk +control_reg.ie +control_reg.irrdy
+                 + control_reg.itrdy + control_reg.itmt + control_reg.itoe + control_reg.iroe + control_reg.ibrk + control_reg.ife
+                 + control_reg.ipe;
+        divisor = divisor_reg;
+        endofokt = endofpkt_reg.data;
+    }
+
+    behavior{
+        init.set_actions(){
+                rm.status.cts = 0;
+        }
+        
+        receive_data.set_actions(){
+            rm.status.rrdy == 1 {
+                //return rxdata_reg.data;
+                rm.rxdata.data = 10;
+            }
+            rm.rxdata.data = 20;
+        }
+
+        altera_uart_tx_chars.set_actions(){
+		
+	}
+
+	altera_uart_rx_chars.set_actions(){
+		bulk (*rm.status.rrdy == 1) {
+			rm.txdata.data = tdc_anyvalue;
+	  		rm.status.e == 1 {
+				rm.status = tdc_anyvalue;
+			}
+		}
+	}
+
+        send_data.set_actions(){
+            rm.status.trdy == 1 {
+                //rm.txdata.data = tdc_anyvalue;//this.data;
+                rm.rxdata.data = 10;
+            }
+            rm.rxdata.data = 30;
+        }
+
+        rxdata_reg.set_address(0);
+        txdata_reg.set_address(4);
+        status_reg.set_address(8);
+        control_reg.set_address(12);
+        divisor_reg.set_address(16);
+        endofpkt_reg.set_address(20);
+        
+        //send_data.bindTo(txdata_reg);
+        //receive_data.bindTo(dxdata_reg);
+    }
+}

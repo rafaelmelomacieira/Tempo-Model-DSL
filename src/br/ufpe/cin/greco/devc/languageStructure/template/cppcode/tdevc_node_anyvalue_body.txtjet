@@ -1,0 +1,25 @@
+<%@jet package="br.ufpe.cin.greco.devc.languageStructure.tdevctemplate" imports="br.ufpe.cin.greco.devc.languageStructure.* br.ufpe.cin.greco.devc.languageStructure.automata.* java.util.*" class="TDEVCNodeAnyValueBody" %>
+<%ArrayList params = (ArrayList) argument;
+Service service = (Service) params.get(0);
+Node node = (Node) params.get(1);
+Edge edge = null;//(Edge) node.getAssignmentEdges().toArray()[0];
+Assignment anyvalue = (Assignment) edge.getTransitions().toArray()[0];
+boolean hasMask = anyvalue.getVar().getRegister().getFormat().itHasMask();
+%>
+case <%=node.getName()%>: //Node Type: <%=node.getType().getName()%>[<%=node.getNodeTransitionType().getName()%>]
+	errorMsg = "<%=node.getName()%> to Rejected State: Expected: Writing of any value in <%=anyvalue.getVar().getSource()%>";
+	errorValue = 0;
+	if (this->getCurrentVarList()->getPlatformAddr() == <%=anyvalue.getVar().getSource().toUpperCase()%>_ADDR)){
+	<%if (hasMask) {%>
+		if(<%=anyvalue.getVar().getRegister().getFormat().getMaskMatchSignature()%>(*<%=anyvalue.getVar().getSource()%>)){
+	<%}%>
+				this->addCoverageCount(<%=service.addFlowCoverageNode(edge.getFrom())%>);
+				return <%=edge.getTo().getName()%>;
+		<%if (hasMask) {%>
+		} else {
+			terrorMsg = "<%=node.getName()%> to Rejected State: Mask Error on <%=anyvalue.getVar().getSource()%>";
+		}
+		<%}%>
+	}
+break;
+

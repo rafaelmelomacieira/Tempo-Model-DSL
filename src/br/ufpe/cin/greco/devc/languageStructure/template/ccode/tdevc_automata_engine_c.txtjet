@@ -1,0 +1,381 @@
+<%@jet package="br.ufpe.cin.greco.devc.languageStructure.tdevctemplate.ccode" imports="br.ufpe.cin.greco.devc.languageStructure.* br.ufpe.cin.greco.devc.languageStructure.type.* java.util.*" class="TDEVCAutomataEngineC" %>
+<%TDCCheckerGenerator tdgen = (TDCCheckerGenerator)argument;
+Register reg;
+String read = "false", write = "false", next, eof;%>
+/**************************************************************************/
+/***********               tdc_automata_engine.c    		***********/
+/**************************************************************************/
+/**************************************************************************/
+/*********** 		        UFPE/Cin - Greco		***********/
+/*********** 		 http://www.cin.ufpe.br/~greco 		***********/
+/*********** 		    Copyright(C) 2011, 2012     	***********/
+/***********							***********/
+/*********** 		    By Rafael Melo Macieira		***********/
+/***********							***********/
+/***********		    E-mail: rmm2@cin.ufpe.br		***********/
+/**************************************************************************/
+/**************************************************************************/
+/**		 Automata Reference for the temporal check		 **/
+/**	   	 Automatas Configuration Class                           **/
+/**************************************************************************/
+
+#include "headers/tdc_automata_engine.h"
+#include "headers/address.h"
+
+//#include <iostream>
+
+//using namespace std;
+
+struct AutomataList *mallocAutomataList(unsigned int platformAddr,
+struct AutomataList *nextAutomata, int EOL,
+struct TDC_Automata *automata) {
+struct AutomataList *retorno = (struct AutomataList *) malloc(
+sizeof(struct AutomataList));
+retorno->platformAddr = platformAddr;
+retorno->nextAutomata = nextAutomata;
+retorno->EOL = EOL;
+retorno->automata = automata;
+
+return retorno;
+}
+
+struct VarList *mallocVarList(unsigned int platformAddr, char*name,
+unsigned int *var, unsigned int read_var, struct VarList *nextVar,
+int EOL, int updated, int readable, //b
+int writable, //b
+unsigned int *bitUsageCounter, unsigned short *bitLastValue) {
+struct VarList *retorno = (struct VarList *) malloc(sizeof(struct VarList));
+
+
+
+retorno->platformAddr = platformAddr;
+retorno->name = name;
+retorno->var = var;
+retorno->read_var = read_var;
+retorno->nextVar = nextVar;
+retorno->EOL = EOL;
+retorno->updated = updated;
+retorno->readable = readable; //b
+retorno->writable = writable; //b
+retorno->bitUsageCounter = bitUsageCounter;
+retorno->bitLastValue = bitLastValue;
+
+return retorno;
+}
+
+struct TDC_Automata_Engine* initialize(){
+
+	struct TDC_Automata_Engine *engine = (struct TDC_Automata_Engine*) malloc(sizeof(struct TDC_Automata_Engine));
+
+<%
+int i = 0;
+for (String string : tdgen.getRegisters().keySet()) {%>
+	unsigned int *var<%=i%> = (unsigned int*) malloc(sizeof(unsigned int));
+<%  i++;
+}
+i= tdgen.getRegisters().size() - 1;
+for (String string : tdgen.getRegisters().keySet()) {
+	reg = tdgen.getRegisters().get(string);
+	read = (reg.getType()==AccessType.READ || reg.getType()==AccessType.READ_WRITE)?"true":"false";
+	write = (reg.getType()==AccessType.WRITE || reg.getType()==AccessType.READ_WRITE)?"true":"false";
+	next = (i==tdgen.getRegisters().size() - 1)?"NULL":("vl"+(i+1));
+	eof = (i==tdgen.getRegisters().size() - 1)?"TRUE":"FALSE";
+	%>
+	//VarList *vl<%=i%> = new VarList(<%=string.toUpperCase()%>_ADDR, "<%=string.toUpperCase()%>",var<%=i%>,<%=read%>,<%=write%>);
+	unsigned int *bitUsageCounter_vl<%=i%> = (unsigned int*) malloc(sizeof(unsigned int) * 32);
+	memset(bitUsageCounter_vl<%=i%>, 0, 32)
+  	unsigned short *bitLastValue_vl<%=i%> = (unsigned short*) malloc(sizeof(unsigned short) * 32);
+  	memset(bitUsageCounter_vl<%=i%>	, 0, 32)
+  	struct VarList *vl<%=i%> = mallocVarList(<%=string.toUpperCase()%>_ADDR,
+                               "<%=string.toUpperCase()%>",
+                               var<%=i%>,
+                               *var<%=i%>,
+                               <%=next%>,
+                               <%=eof%>,
+                               TRUE,
+							   <%=read.toUpperCase()%>,
+							   <%=write.toUpperCase()%>,
+							   bitUsageCounter_vl<%=i%>,
+							   bitLastValue_vl<%=i%>);
+	
+<%  i--;
+}
+i=tdgen.getServices().size() - 1;
+for (String string : tdgen.getServices().keySet()) {
+	next = (i==tdgen.getServices().size() - 1)?"NULL":("al"+(i+1));
+	eof = (i==tdgen.getServices().size() - 1)?"TRUE":"FALSE";
+	%>
+	struct TDC_Automata *aut<%=i%> = <%=string%>_initialize(vl0);
+    struct AutomataList *al<%=i%> = mallocAutomataList(<%=string.toUpperCase()%>_ADDR,
+                               <%=next%>,
+                               <%=eof%>,
+                               aut<%=i%>);
+	//TDC_Automata *aut<%=i%> = new TDC_Automata_<%=string%>(vl0);
+	//AutomataList *al<%=i%> = new AutomataList(<%=string.toUpperCase()%>_ADDR, aut<%=i%>);
+<%
+	i--;
+}%>
+  engine->runStepNow = FALSE;
+  engine->isLastRead = FALSE;
+  engine->mainVarList = vl0;
+  engine->mainAutomataList = al0;
+  engine->errorCount = 0;
+  return engine;
+};
+
+
+void checkThisVar(struct TDC_Automata_Engine *engine, unsigned int platformAddr) {
+	//std::string msg;
+	char* msg;
+	int rError = 0;
+	short ret;
+	engine->runStepNow = 0;
+	engine->tmpReadedPlatformAddr = platformAddr;
+	ret = containsVar(engine->mainVarList, platformAddr);
+	if (ret) {
+		engine->runStepNow = 1;
+		engine->currentVarList = getVarListByPlatformAddr(engine->mainVarList,
+				platformAddr);
+		//std::cout << "\nAddress Permitido: " << std::hex << platformAddr << " REG: " <<  this->currentVarList->name << "\n";
+	} else {
+		ret = containsAutomata(engine->mainAutomataList, platformAddr);
+		if (ret) {
+			if (engine->isLastRead) {
+				msg = internalRunStep(engine, 0, engine->lastReadedData,
+						&rError);
+				if (rError > 0) {
+					if (engine->errorCount < 15) {
+						engine->errorMsgs[engine->errorCount] = msg;
+					}
+					engine->errorCount++;
+					printf("MSG: %s\n", msg);
+				}
+				//printf("MSG: %s\n", msg);
+				engine->isLastRead = FALSE;
+			}
+			if (engine->inAutomata) {
+				if (engine->currentAutomata->end == FALSE) {
+					//std::cout << "** [TemporalDevC] Warning :: Another function called before the end of the current function! Address[" << hex << platformAddr << "] function[" << mainAutomataList->getAutomataListByPlatformAddr(mainAutomataList, platformAddr)->getAutomata()->name << "]\n" << endl;
+				} else {
+					engine->currentAutomata = getAutomata(
+							getAutomataListByPlatformAddr(
+									engine->mainAutomataList, platformAddr));
+
+					//std::cout << "\nCHAMOU METODO! no Endereco: " << std::hex << platformAddr << " Aut: " << this->currentAutomata->name << "\n";
+					engine->currentAutomata->reset(engine->currentAutomata);
+					clearAllUpdate(engine->mainVarList);
+				}
+			} else {
+				engine->inAutomata = TRUE;
+				engine->currentAutomata = getAutomata(
+						getAutomataListByPlatformAddr(engine->mainAutomataList,
+								platformAddr));
+				//std::cout << "\nCHAMOU METODO! ja fora no Endereco: " << std::hex << platformAddr << " Aut: " << this->currentAutomata->name <<  "\n";
+				engine->currentAutomata->reset(engine->currentAutomata);
+				clearAllUpdate(engine->mainVarList);
+			}
+		}
+	}
+}
+;
+
+void runStep(struct TDC_Automata_Engine *engine, char access_type,
+		unsigned int data) {
+	//std::string msg;
+	char* msg;
+	int rError = 0;
+	if (engine->inAutomata)
+		if (engine->currentAutomata->end) {
+			//std::cout << "\nNO FIM!";
+			engine->inAutomata = FALSE;
+		}
+	if (engine->runStepNow) {
+		if (engine->inAutomata) {
+			if (access_type == 0) {
+				if (engine->isLastRead) {
+					//*tmpCurrentVarList = *currentVarList;
+					engine->currentVarList = getVarListByPlatformAddr(
+							engine->mainVarList,
+							engine->lastReadedPlatformAddr);
+					msg = internalRunStep(engine, 0, engine->lastReadedData,
+							&rError);
+					if (rError > 0) {
+						if (engine->errorCount < 15) {
+							engine->errorMsgs[engine->errorCount] = msg;
+						}
+						engine->errorCount++;
+						printf("MSG: %s\n", msg);
+					}
+				}
+				engine->isLastRead = TRUE;
+				engine->lastReadedPlatformAddr = engine->tmpReadedPlatformAddr;
+				engine->lastReadedData = data;
+			} else {
+				//std::cout << "ESCRITA!";
+				msg = internalRunStep(engine, 1, data, &rError);
+				if (rError > 0) {
+					if (engine->errorCount < 15) {
+						engine->errorMsgs[engine->errorCount] = msg;
+					}
+					engine->errorCount++;
+					printf("MSG: %s\n", msg);
+				}
+				engine->isLastRead = FALSE;
+			}
+			//
+			//msg = internalRunStep(access_type, data, &rError);
+			if (rError == 1) {
+				engine->inAutomata = FALSE;
+				rError = FALSE;
+				//std::cout << msg << "\n";
+			}
+		} else {
+			/*std::cout << "Valor Hex: " << std::hex << data << " | Valor Dec: " << std::dec << data << std::endl;
+			 std::cout << "** [TemporalDevC] Warning :: running writes after a function end or in a function out of verification!\n";*/
+		}
+	}
+}
+
+char* internalRunStep(struct TDC_Automata_Engine *engine, char access_type,
+		unsigned int data, int* rError) {
+	char* retorno = (char *) malloc(100 * sizeof(char));
+	retorno[0] = '\0';
+	printf("Internal Run Step\n");
+	if (access_type == FALSE) {
+		if (!(isReadable(engine->currentVarList))) {
+			*rError = 1;
+			sprintf(retorno, "%s  register is not readable!",
+					engine->currentVarList->name);
+			return retorno;
+		}
+		//std::cout << " - Valor lido: " << std::dec << data;
+		update(engine->currentVarList);
+		setReadVar(engine->currentVarList, data);
+	} else {
+		if (!(isWritable(engine->currentVarList))) {
+			*rError = 1;
+			sprintf(retorno, "%s  register is not writable!",
+					engine->currentVarList->name);
+			return retorno;
+		}
+	}
+	setVar(engine->currentVarList, &data);
+	setCurrentVarList(engine->currentAutomata, engine->currentVarList);
+	//std::cout << "Valor Hex: " << std::hex << data << " | Valor Dec: " << std::dec << data << std::endl;
+	retorno = engine->currentAutomata->runStep(engine->currentAutomata,
+			access_type, engine->mainVarList, rError); //MUDAR PARA ATUALIZAR SOMENTE UMA VARIAVEL!!! BY ADDR
+	//printReport(engine);
+	return retorno;
+}
+
+void printReport(struct TDC_Automata_Engine *engine) {
+	FILE *file = fopen("TDEVCreport.txt", "w");
+	//reportFile.open("tdc_report.log", ofstream::out);// | ofstream::app);
+	fprintf(file, "#############################################\n");
+	fprintf(file, "=============================================\n");
+	fprintf(file, "==========        Error Log         =========\n");
+	fprintf(file, "=============================================\n");
+	printErrorReport(engine, file);
+	fprintf(file, "\n");
+	fprintf(file, "#############################################\n");
+	fprintf(file, "=============================================\n");
+	fprintf(file, "==========       Flow Coverage      =========\n");
+	fprintf(file, "=============================================\n");
+	printFlowReport(engine, file);
+	fprintf(file, "\n");
+	fprintf(file, "#############################################\n");
+	fprintf(file, "=============================================\n");
+	fprintf(file, "==========       Data Coverage      =========\n");
+	fprintf(file, "=============================================\n");
+	fprintf(file, "\n");
+	printDataReport(engine, file);
+	fclose(file);
+}
+;
+
+void printDataReport(struct TDC_Automata_Engine *engine, FILE *reportFile) {
+
+	struct VarList *head = engine->mainVarList;
+	struct VarList *temp;
+	unsigned int *bitUsage;
+	int i;
+
+	for (temp = head; temp != NULL; temp = temp->nextVar) {
+		fprintf(reportFile, "\n\n\n** Register: %s\n\n", temp->name);
+		bitUsage = getBitUsageCounter(temp);
+		for (i = getPlatformWordLen(temp) - 1; i >= 0; i--) {
+			fprintf(reportFile, "[");
+			if (i < 10)
+				fprintf(reportFile, "0");
+			fprintf(reportFile, "%d", i);
+			fprintf(reportFile, "] -> %d\n", bitUsage[i]);
+		}
+
+	}
+}
+;
+
+void printFlowReport(struct TDC_Automata_Engine *engine, FILE *reportFile) {
+	//ofstream reportFile;
+	unsigned int i;
+	short automataCoverage = FALSE;
+	unsigned int globalCoverageCount = 0;
+	unsigned int coverageTotal = 0;
+	unsigned int runTotal = 0;
+	//reportFile.open("tdc_report.log", ofstream::out);// | ofstream::app);
+	fprintf(reportFile, "===========================\n");
+	fprintf(reportFile, "Services not covered\n");
+	fprintf(reportFile, "===========================\n");
+
+	struct AutomataList *head = engine->mainAutomataList;
+	struct AutomataList *temp;
+	char achou = 0;
+	for (temp = head; temp != NULL; temp = temp->nextAutomata) {
+		globalCoverageCount = globalCoverageCount + temp->automata->steps;
+		for (i = 0; i < temp->automata->steps; i++) {
+			if (temp->automata->coverage[i] > 0) {
+				coverageTotal++;
+				automataCoverage = TRUE;
+			}
+			runTotal = runTotal + temp->automata->coverage[i];
+		}
+		if (!automataCoverage){
+			fprintf(reportFile, "%s\n", temp->automata->name);
+		}
+		automataCoverage = FALSE;
+	}
+
+
+	fprintf(reportFile, "===========================\n");
+	fprintf(reportFile, "Total Steps: %d\n", globalCoverageCount);
+	if (globalCoverageCount == 0) {
+		fprintf(reportFile, "Total Steps Covered: %d(0%%)\n", coverageTotal);
+	} else {
+		fprintf(reportFile, "Total Steps Covered: %d(%d%%)\n", coverageTotal,
+				((coverageTotal * 100) / globalCoverageCount));
+	}
+	fprintf(reportFile, "Total Runs: %d\n", runTotal);
+	fprintf(reportFile, "===========================\n");
+	//reportFile.flush();
+	//reportFile.close();
+}
+
+void printErrorReport(struct TDC_Automata_Engine *engine, FILE *reportFile) {
+	int i;
+	int errorsToShow = (engine->errorCount <= 15 ? engine->errorCount : 15);
+
+	fprintf(reportFile, "===========================\n");
+	fprintf(reportFile, "Showing %d of %d erros\n", errorsToShow,
+			engine->errorCount);
+	fprintf(reportFile, "===========================\n");
+
+	for (i = 0; i < errorsToShow; i++) {
+		fprintf(reportFile, engine->errorMsgs[i]);
+	}
+
+	fprintf(reportFile, "\n");
+
+}
+  
+/*int TDC_Automata_Engine::isVarToCheck(unsigned int platformAddr){
+  };*/

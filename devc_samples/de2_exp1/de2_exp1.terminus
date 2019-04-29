@@ -1,0 +1,6 @@
+name=de2_exp1
+busWidth=32
+numofdevcfiles=3
+devcfile.1=altuart
+devcfile.0=ethernet_dm9000a
+devcfile.2=sdcard

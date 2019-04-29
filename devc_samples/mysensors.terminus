@@ -1,0 +1,92 @@
+device (mysensors) {
+    
+    pattern CHANNEL3EN =   mask(...............1........);
+    pattern CHANNEL2EN =   mask(................1.......);
+    pattern CHANNEL1EN =   mask(.................1......);
+    pattern CHANNEL0EN =   mask(..................1.....);
+    pattern ALLCHANNELEN = mask(...............1111.....);
+    pattern ALLCHANNELDI = mask(...............0000.....);
+    pattern DEVEN = mask(.......................1);
+    pattern DEVDI = mask(.......................0);
+
+    //Register: [23:17-Reservado|16:13-ChannelIrqEnable|12:9-Reservado|8:5-ChannelEnable|4:3-Reservado|2:1-ChannelSel|0-On/Off]
+    external register DeviceConfigurationRegister(0x00) alias DCR {
+        reserved [23:17];
+        CHANNELIRQENABLE {
+            RW IE_CHANNEL3 [16];
+            RW IE_CHANNEL2 [15];
+            RW IE_CHANNEL1 [14];
+            RW IE_CHANNEL0 [13];
+        };
+        reserved [12:9];
+        CHANNELENABLE {
+            RW E_CHANNEL3 [8];
+            RW E_CHANNEL2 [7];
+            RW E_CHANNEL1 [6];
+            RW E_CHANNEL0 [5];
+        };
+        reserved [4:3];
+        RW CHANNEL_SEL [2:1];
+        RW DEVICE_ENABLE [0];
+    }
+    
+    external register CHANNEL_TIME_SCALE(0x04) alias CTS {
+        reserved [31:2];
+        RW SCALE[1:0];
+    }
+     
+    external register CHANNEL_TIME_BOUNDARY(0x08) alias CTB {
+        RW TIME[31:0];
+    }
+    
+    external register CHANNEL_LAST_SIGNAL(0x0C) alias CLS {
+        reserved [31:4];
+        READ CHANNEL3 [3];
+        READ CHANNEL2 [2];
+        READ CHANNEL1 [1];
+        READ CHANNEL0 [0];
+    }
+    
+globalstate {
+
+//***************************[LINK MODE]******************************
+
+    orthoregion device_enable {
+        initialstate DEVICE_DISABLE {
+            addexitpoint(DEVICE_ENABLE){
+                write(DCR.DEVICE_ENABLE) == DEVEN
+            }
+        }
+        state DEVICE_ENABLE {
+            addexitpoint(DEVICE_DISABLE){
+                write(DCR.DEVICE_ENABLE) == DEVDI
+            }
+            state DEV1{
+                addexitpoint(DEV2){
+                write(DCR.DEVICE_ENABLE) == DEVDI
+                }
+                state CDEV1{
+                    addexitpoint(CDEV2){
+                    write(DCR.DEVICE_ENABLE) == DEVDI
+                    }
+                 }
+                state CDEV2{
+                    addexitpoint(CDEV3){
+                    write(DCR.DEVICE_ENABLE) == DEVDI
+                    }
+                }
+                state CDEV3{
+                    addexitpoint(CDEV1){
+                    write(DCR.DEVICE_ENABLE) == DEVDI
+                    }
+                 }
+            }
+            state DEV2{
+                addexitpoint(DEV1){
+                write(DCR.DEVICE_ENABLE) == DEVDI
+                }
+            }
+        }
+    }
+   }
+}

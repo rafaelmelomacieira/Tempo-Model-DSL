@@ -1,0 +1,5 @@
+rm ../devc/*.java
+jflex -d ../devc/ tdevc_lex_java.y
+cup -progress -package br.ufpe.cin.greco.devc.languageStructure.devc tdevc_java.y
+cp sym.java parser.java ../devc/
+rm *.java

@@ -1,0 +1,5 @@
+#rm $1.png
+#dot -Tpng $1.dot -o $1.png
+#eog $1.png
+rm *.png
+find . -name "*.dot" -type f -exec dot -Tpng {} -o {}.png \;

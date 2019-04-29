@@ -1,0 +1,108 @@
+\chapter{TDevC Language}
+
+\section{Informal View of TDevC HSM} \label{sec:informal}
+
+	All service declaration in TDevC permits to specify links between others services of the device. These links determine if another service can or cannot be executed after a certain service execution. This means that the device execution maintains a main flow of service calls that can be represented as a FSM. A main service flow (device flow) is import to know the current execution state of the device, infered from this state machine.
+	
+	Regarding each service, they are formed by a sequence of statements and service calls that represents their behavior. As the device flow FSM, this sequence inside a service can be represented as another FSM. So, each state of the main FSM contains another FSM inside.
+	
+	Besides the hierarchy between the device flow FSM and service behavior FSM, there is another hierarchical dependency between services. Every service call inside a service represents a transition to a state which is indeed another service FSM.
+	
+	These hierarchies are specified here as a hierarchical state machine called TDevC HSM. The TDevC HSM is defined as a set of customized DFAs hierarchically distributed. These customized DFAs are classified in three types:
+	
+	\begin{itemize}
+		\item Device-DFA (DDFA): This is the highest level DFA of the TDevC HSM. This DFA represents the device's state, i.e., the relationship between the device's services. Each state of it represents another customized DFA called SDFA. This DFA will be better explained in section \ref{sec:ddfa}.
+		\item Service-DFA (SDFA): This DFA represents the behavior of the services. For a clearly understanding, their flow are splited in two ({\it regular} and {\it non-regular}) and depending on the flow type, thier states can be others SDFAs, flow execution points and other customized DFA called NEDFA. This DFA will be better explained in section \ref{sec:sdfa}.
+		\item Non-regular Event-DFA (NEDFA): This DFA represents states of the non-regular flow of the SDFAs. This DFA will be better explained in section \ref{sec:nedfa}.
+	\end{itemize}
+	
+	In an overview, this approach provides, for each device, one DDFA representing the device's execution flow, which each state of this DFA is a SDFAs. This SDFAs, representing the services' execution flow, contain transitions between their states, equivalent to statement executions (linking flow execution points) and service calls.
+	
+	When a transition in a SDFA is a service call, the target state must be a SDFA or a NEDFA. For SDFA target states, the transition must be in the regular flow and for NEDFA target states, non-regular flow.
+	
+	A regular flow in a service flow means all sequence of statements and service calls with a fixed and predefined moment to happen. In the other hand, a non-regular flow is all sequence of statements and service calls inside a service that might occurs any moment in the service execution. Every non-regular flow must ends with a empty transition to the regular flow state that triggered the non-regular flow transition.
+	
+	%However, there is a situation that a non-regular flow implies on a transition to a SDFA. This situation is called {\it service call exception (SCE)}. A SCE means an unexpected, however known, transition to another SDFA without a return to the service's regular flow.
+	
+\section{Formal Definition of TDevC HSM} \label{sec:formal}
+
+	Let's start the formal definition with some delcarations:
+
+	\begin{itemize}
+		\item $K$ is the set of all specification's DFAs;
+		\item $Q$ is the set of all SDFAs, where $Q \subset K$;
+		\item $M$ is the set of all NEDFAs, where $M \subset K$;
+		\item $Z$ is the set of all "service calls";
+		\item $R$ is the set of the reject states.
+	\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{DDFA} \label{sec:ddfa}
+	A DDFA can be defined as a "six-tuple": $D=(Q \cup \{s_{f}\},\Sigma_{d},\delta_{d},q_{0},F_{d}, r_{0})$, onde:
+
+	\begin{itemize}
+		\item $Q \cup \{s_{f}\}$ is the set of all DDFA's states, where $s_{f}$ is the {\it standby} state.
+		\item $\Sigma_{s}$ is the alphabet (input elements), where $\Sigma_{s} \subset Z$.
+		\item $\delta_{s}$ is the transition function, where $\delta_{s}(q_{i},e) \rightarrow q_{j}$, onde $q_{i}$ e $q_{j} \in Q$ e $e \in \Sigma_{s}$
+		\item $q_{0}$ is the initial state, where $q_{0} \in Q$
+		\item $F_{s}$ is the set of the final states of the DDFA. For all DDFA, $F_{s} = \{s_{f}\}$.
+		\item $r_{0}$ is the reject state, where $r_{0} \in R$
+	\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{SDFA} \label{sec:sdfa}
+
+Assim, um SDFA $Q_{i} \in Q$ pode ser representado por $S=(Q_{i} \cup U_{i} \cup M_{i}, \Sigma_{s},\delta_{s},u_{0},F_{s},r_{0})$, onde:
+	\begin{itemize}
+		\item $Q_{i} \cup U_{i} \cup M_{i}$ is the set of all SDFA's states, where: 
+		\begin{itemize}	
+			\item $Q_{i} \subset Q$,
+			\item $U_{i} \subset U$, where $U$ is the set of intermediate states, i. e., states that represent the flow execution points;
+			\item $M_{i} \subset Q \cup U$, where $M_{i}$ is the set of all NEDFAs of the current SDFA's non-regular flow.
+		\end{itemize}
+		%\item $E_{i}$ é o conjunto dos estados de exceção alcançáveis do SDFA em questão. Assim, $E_{i} = E_{k} \cup E_{k+1} \cup ... \cup E_{t}$, onde $E_{k}$ é o conjunto dos estados de exceção especificados para o SDFA $Q_{i}$ em questão (se $q_{i} \in Q$ e $t$ nível hierárquico do seu ancestral de mais alto nível. $E_{i} \subset Q$.
+		\item $\Sigma_{q}$ is the alphabet (input elements), where $\Sigma_{q} \subset T \cup Z$, and:
+		\begin{itemize}
+			\item $T$ is the set of flow elements (statements), where $T = A \cup C \cup D$;
+			\item $A$ is the set of "assignment";
+			\item $C$ is the set of "conditions";
+			\item $Y$ is the set of "delays";
+		\end{itemize}		
+		\item $\delta_{q}$ is the transition function, where $\delta_{q}(qu_{i},e) \rightarrow qu_{j}$, onde:
+		\begin{itemize}
+		 %\item if $qu_{i}$ and $qu_{j} \in Q_{i} \cup U_{i} \cup M_{i}$ then $e \in \Sigma_{s}$;
+		 \item if $qu_{i} \in M_{i}$ and $qu_{j} \in Q_{i} \cup U_{i}$ then $e = \varepsilon$.
+		\end{itemize}
+		\item $u_{0}$ is the initial state, where $u_{0} \in U$
+		is the set of the final states of the SDFA. For all SDFA,
+		\item $F_{q}$ is the set of the final states of the SDFA, where $F_{q} \subset F$ and $F$ is the set of all final states of the device.
+		\item $r_{0}$ is the reject state, where $r_{0} \in R$		
+	\end{itemize}
+	The $Z$ elements are composed by a number representing the phisical address of the function call or a index identifing the service.
+	
+	On the other hand, the $T$ elements can have the following formats:
+ 	\begin{itemize}
+		\item $e_{a} \in A$, where $e_{a} = $(value, address, access\_type);
+		\item $e_{c} \in C$, where $e_{c} = $(logic\_expression);
+		\item $e_{d} \in D$, where $e_{d} = tick|scale$;
+	\end{itemize}
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{NEDFA} \label{sec:nedfa}
+	A NEDFA $N_{i} \in Q$ can be defined as $N=(Q_{i} \cup U_{i}, \Sigma_{n},\delta_{n},u_{0},F_{n},r_{0})$, where:
+
+	\begin{itemize}
+		\item $Q_{i} \cup U_{i}$ is the set of all NEDFA's states, where: 
+		\begin{itemize}	
+			\item $Q_{i} \subset Q$;
+			\item $U_{i} \subset U$.
+		\end{itemize}
+		%\item $E_{i}$ é o conjunto dos estados de exceção alcançáveis do SDFA em questão. Assim, $E_{i} = E_{k} \cup E_{k+1} \cup ... \cup E_{t}$, onde $E_{k}$ é o conjunto dos estados de exceção especificados para o SDFA $Q_{i}$ em questão (se $q_{i} \in Q$ e $t$ nível hierárquico do seu ancestral de mais alto nível. $E_{i} \subset Q$.
+		\item $\Sigma_{n}$ is the alphabet (input elements), where $\Sigma_{q} \subset T \cup Z$, and:
+		\item $\delta_{n}$ is the transition function, where $\delta_{q}(qu_{i},e) \rightarrow qu_{j}$, onde:
+		\item $u_{0}$ is the initial state, where $u_{0} \in U$
+		is the set of the final states of the SDFA. For all SDFA,
+		\item $F_{q}$ is the set of the final states of the SDFA, where $F_{q} \subset F$ and $F$ is the set of all final states of the device.
+		\item $r_{0}$ is the reject state, where $r_{0} \in R$		
+	\end{itemize}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Relationship Between DDFA, SDFA and NEDFA} \label{sec:relationship}

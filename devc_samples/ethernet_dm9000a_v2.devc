@@ -1,0 +1,682 @@
+device(dm9000a){
+
+    // ****** Patterns' Declarations ******
+    //Loopback Mode Pattern
+    pattern LKBNormalPattern = b01;
+    pattern LKBMACPattern = b01;
+    pattern LKBPHYPattern = b10;
+    pattern LKBReservedPattern = b11;
+    //Jam Pattern Time
+    pattern JPT5usPattern = 0;
+    pattern JPT10usPattern = 1;
+    pattern JPT15usPattern = 2;
+    pattern JPT25usPattern = 3;
+    pattern JPT50usPattern = 4;
+    pattern JPT100usPattern = 5;
+    pattern JPT150usPattern = 6;
+    pattern JPT200usPattern = 7;
+    pattern JPT250usPattern = 8;
+    pattern JPT300usPattern = 9;
+    pattern JPT350usPattern = 10;
+    pattern JPT400usPattern = 11;
+    pattern JPT450usPattern = 12;
+    pattern JPT500usPattern = 13;
+    pattern JPT550usPattern = 14;
+    pattern JPT600usPattern = 15;
+    //Inter-Frame Gap Setting
+    pattern IFGS96bIPattern = mask(0...);
+    pattern IFGS64bPattern = b1000;
+    pattern IFGS72bPattern = b1001;
+    pattern IFGS80bPattern = b1010;
+    pattern IFGS88bPattern = b1011;
+    pattern IFGS96bIIPattern = b1100;
+    pattern IFGS104bPattern = b1101;
+    pattern IFGS112bPattern = b1110;
+    pattern IFGS120bPattern = b1111;
+    //System Clock Control
+    pattern SSC50mhzPattern = 0;
+    pattern SSC20mhzPattern = 1;
+    pattern SSC100mhzPattern = 2;
+    pattern SSCreservedPattern = 3;
+    //Early Transmit Threshold
+    pattern ETT12_5Pattern = 0;
+    pattern ETT25Pattern = 1;
+    pattern ETT50Pattern = 2;
+    pattern ETT75Pattern = 3;
+    pattern ReceivedOK = mask(.......1);
+    pattern DM9000A_BYTE_MODE = ffff;
+    pattern DM9000A_WORD_MODE = ffff;
+
+    
+    // ****** Services' Declarations ******
+    
+
+    service s_powerOnReset;
+    service s_softwareReset;
+    service s_MACpowerUpMode;
+    service s_PHYpowerUpMode;
+    service s_PHYpowerDownMode;
+    service s_MACpowerDownMode;   
+    service s_PacketReception;
+    service s_ReadEEPROMData;
+    service s_WriteEEPROMData;
+    service s_PacketTransmission;
+    service s_ReadPHYRegister;    
+    service s_WritePHYRegister
+    service s_ReceiveInterruptServiceRoutine;
+    service s_NotreadyPacketReception;
+    service s_CheckPacketStatusAndLength;
+
+    requirement r_softwareReset;
+    requirement r_PHYpowerDownMode;
+    requirement r_MACpowerDownMode;
+    requirement r_MACpowerUpMode;
+    requirement r_PHYpowerUpMode;    
+    requirement r_PacketTransmissionStep1_byte;
+    requirement r_PacketTransmissionStep1_word;
+    requirement r_PacketTransmissionStep21; 
+    requirement r_PacketTransmissionStep22;
+    requirement r_PacketTransmissionStep23;
+    requirement r_PacketTransmissionStep3;
+    requirement r_ReadEEPROMDataStep1;
+    requirement r_ReadEEPROMDataStep21;
+    requirement r_ReadEEPROMDataStep22;
+    requirement r_ReadEEPROMDataStep31;
+    requirement r_ReadEEPROMDataStep32;
+    requirement r_ReadEEPROMDataStep4;
+    requirement r_WriteEEPROMDataStep1
+    requirement r_WriteEEPROMDataStep21
+    requirement r_WriteEEPROMDataStep22
+    requirement r_WriteEEPROMDataStep31
+    requirement r_WriteEEPROMDataStep32
+    requirement r_WriteEEPROMDataStep33
+    requirement r_WriteEEPROMDataStep4
+    requirement r_WriteEEPROMDataStep5
+    requirement r_ReadPHYRegisterStep1;
+    requirement r_ReadPHYRegisterStep21;
+    requirement r_ReadPHYRegisterStep22;
+    requirement r_ReadPHYRegisterStep3;
+    requirement r_ReadPHYRegisterStep4;
+    requirement r_ReadPHYRegisterStep5;
+    requirement r_WritePHYRegisterStep1
+    requirement r_WritePHYRegisterStep21;
+    requirement r_WritePHYRegisterStep22;
+    requirement r_WritePHYRegisterStep31;
+    requirement r_WritePHYRegisterStep32;
+    requirement r_WritePHYRegisterStep4;
+    requirement r_WritePHYRegister5;
+    requirement r_ReceiveInterruptServiceRoutineStep1;
+    requirement r_ReceiveInterruptServiceRoutineStep2;
+    requirement r_NotreadyPacketReception;
+    requirement r_CheckPacketStatusAndLength;
+
+    // ****** Formats' Declarations ******
+    //format data_param_fmt = "%data:8";
+    format txStatusfmt {
+        READ TJTO[7];
+        READ LOSSC[6];
+        READ NC[5];
+        READ LATEC[4];
+        READ COL[3];
+        READ EC[2];
+        READ reserved[0:1];
+    }
+    
+    format multicastAddrfmt {
+        RW MAB[7:0];
+    }
+    
+    format physicalAddrfmt {
+        RW PAB[7:0];
+    }
+
+    // ****** Registers' Declarations ******
+    //dc_reg < ,READ> networkControlReg;
+    register networkStatusReg(0x00) alias NSR {
+        READ SPEED [7];
+        READ LINKST [6];
+        RW WAKEST [5];
+        READ reserved [4];
+        RW TX2END [3];
+        RW TX1END [2];
+        READ RXOV [1];
+        READ reserved [0];
+    }
+
+    //dc_reg < ,READ> networkStatusReg;
+    register networkControlReg(0x01) alias NCR {
+        RW reserved[7];
+        RW WAKEEN[6];
+        READ reserved[5];
+        RW FCOL[4];
+        READ FDX[3];
+        RW LBK[2:1];
+        RW RST[0];
+    }
+    
+    //dc_reg <rtxdata_fmt,WRITE> txControlReg;
+    register txControlReg(0x02) alias TCR {
+        READ reserved[7];
+        RW TJDIS[6];
+        RW EXCECM[5];
+        RW PAD_DIS2[4];
+        RW CRC_DIS2 [3];
+        RW PAD_DIS1 [2];
+        RW CRC_DIS1 [1];
+        RW TXREQ [0];
+    }
+    
+    //dc_reg <rtxdata_fmt,WRITE> txStatusRegI;
+    register txStatusRegI(0x03) alias TSRI = txStatusfmt;
+    
+    //dc_reg <rtxdata_fmt,WRITE> txStatusRegII;
+    register txStatusRegII(0x04) alias TSRII = txStatusfmt;
+
+    //dc_reg <rtxdata_fmt,WRITE> rxControlReg;
+    register rxControlReg(0x05) alias RCR {
+        RW reserved[7];
+        RW WTDIS[6];
+        RW DIS_LONG[5];
+        RW DIS_CRC[4];
+        RW ALL[3];
+        RW RUNT[2];
+        RW PRMSC [1];
+        RW RXEN[0];
+    }
+    
+    //dc_reg <rtxdata_fmt,WRITE> rxStatusReg;
+    register rxStatusReg(0x06) alias RSR {
+        READ RF[7];
+        READ MF[6];
+        READ LCS[5];
+        READ RWTO[4];
+        READ PLE[3];
+        READ AE[2];
+        READ CE[1];
+        READ FOE[0];
+    }
+    
+    //dc_reg <rtxdata_fmt,WRITE> receiveOverflowCounterReg;
+    register receiveOverflowCounterReg(0x07) alias ROCR {
+        READ RXFU[7];
+        READ ROC[6:0];
+    }
+    
+    //dc_reg <rtxdata_fmt,WRITE> backPressureThresholdReg; 
+    register backPressureThresholdReg(0x08) alias BPTR {
+        RW BPHW[7:4];
+        RW JPT[3:0];
+    } 
+
+    //dc_reg <rtxdata_fmt,WRITE> flowControlThresholdReg;
+    register flowControlThresholdReg(0x09) alias FCTR {
+        RW HWOT[7:4];
+        RW LWOT[3:0];
+    }
+    
+    //dc_reg <rtxdata_fmt,WRITE> rxtxFlowControlReg;
+    register rxtxFlowControlReg(0x0A) alias FCR {
+        RW TXP0[7];
+        RW TXPF[6];
+        RW TXPEN[5];
+        RW BKPA[4];
+        RW BKPM[3];
+        READ RXPS[2];
+        READ RXPCS[1];
+        RW FLCE[0];
+    }
+    //dc_reg <rtxdata_fmt,WRITE> multicastAddressReg;
+    register multicastAddressReg7(0x1D) alias MAR7 = multicastAddrfmt;
+    register multicastAddressReg6(0x1C) alias MAR6 = multicastAddrfmt;
+    register multicastAddressReg5(0x1B) alias MAR5 = multicastAddrfmt;
+    register multicastAddressReg4(0x1A) alias MAR4 = multicastAddrfmt;
+    register multicastAddressReg3(0x19) alias MAR3 = multicastAddrfmt;
+    register multicastAddressReg2(0x18) alias MAR2 = multicastAddrfmt;
+    register multicastAddressReg1(0x17) alias MAR1 = multicastAddrfmt;
+    register multicastAddressReg0(0x16) alias MAR0 = multicastAddrfmt;
+    
+    //dc_reg <rtxdata_fmt,WRITE> wakeUpControlReg;
+    register wakeUpControlReg(0x0F) alias WCR {
+        READ reserved[7:6];
+        RW LINKEN[5];
+        RW SAMPLEEN[4];
+        RW MAGICEN[3];
+        READ LINKST[2];
+        READ SAMPLEST[1];
+        READ MAGICST[0];
+    }
+    
+    //dc_reg <rtxdata_fmt,WRITE> physicalAddressRegister;
+    register physicalAddressRegister5(0x15) alias PAR5 = physicalAddrfmt;
+    register physicalAddressRegister4(0x14) alias PAR4 = physicalAddrfmt;
+    register physicalAddressRegister3(0x13) alias PAR3 = physicalAddrfmt;
+    register physicalAddressRegister2(0x12) alias PAR2 = physicalAddrfmt;
+    register physicalAddressRegister1(0x11) alias PAR1 = physicalAddrfmt;
+    register physicalAddressRegister0(0x10) alias PAR0 = physicalAddrfmt;
+    
+    
+    //dc_reg <rtxdata_fmt,WRITE> generalPurposeControlReg;
+    register generalPurposeControlReg(0x1E) alias GPCR {  
+        READ reserved[7];
+        READ GPC64[6:4];
+        RW GPC31[3:1];
+        READ reserved[0];
+    }
+    
+    //dc_reg <rtxdata_fmt,WRITE> generalPurposeReg; gpr
+    register generalPurposeReg(0x1F) alias GPR {
+        READ reserved[7];
+        RW GPO[6:4];
+        RW GPIO[3:1];
+        RW PHYPD[0];
+    }
+    
+    //dc_reg <rtxdata_fmt,WRITE> txSRAMReadPointerAddressLowByte;
+    register txSRAMReadPointerAddress(0x22) alias TRPA {
+        READ TRPAL[15:8];
+        READ TRPAH[7:0];
+    }
+    
+    //dc_reg <rtxdata_fmt,WRITE> rxSRAMWritePointerAddressLowByte;
+    register rxSRAMWritePointerAddressByte(0x24) alias RWPA {
+        READ RWPAL[15:8];
+        READ RWPAH[7:0];
+    }
+
+    //dc_reg <rtxdata_fmt,READ> vendorID;
+    register vendorID(0x28) alias VID {
+        READ VIDL[15:8];
+        READ VIDH[7:0];
+    }
+
+    //dc_reg <rtxdata_fmt,READ> productID;
+    register productID(0x2A) alias PID {
+        READ PIDL[15:8];
+        READ PIDH[7:0];
+    }
+    
+    //dc_reg <rtxdata_fmt,WRITE> CHIPRevision;
+    register CHIPRevision(0x2C) alias CHIPR {
+        READ CHIPR[7:0];
+    }
+
+    //dc_reg <rtxdata_fmt,WRITE> txControlRegII;
+    register txControlRegII(0x2D) alias TCR2 {
+        RW LED[7];
+        RW RLCP[6];
+        RW DTU[5];
+        RW ONEPM[4];
+        RW IFGS[3:0];
+    }
+
+    //dc_reg <rtxdata_fmt,WRITE> operationControlReg;
+    register operationTestControlReg(0x2E) alias OCR {
+        RW SCC[7:6];
+        RW reserved[5];
+        RW SOE[4];
+        RW SCS[3];
+        RW PHYOP[2:0];
+    }
+
+    //dc_reg <rtxdata_fmt,WRITE> specialModeControlReg;
+    register specialModeControlReg(0x2F) alias SMCR {
+        RW SM_EN[7];
+        RW reserved[6:3];
+        RW FLC[2];
+        RW FB1[1];
+        RW FB0[0];
+    }
+
+    //dc_reg <rtxdata_fmt,WRITE> earlyTransmitControl_StatusReg;    
+    register earlyTransmitControl_StatusReg(0x30) alias ETXCSR {
+        RW ETE[7];
+        READ ETS2[6];
+        READ ETS1[5];
+        READ reserved[4:2];
+        RW ETT[1:0];
+    }
+    
+    //dc_reg <rtxdata_fmt,WRITE> transmitCheckSumControlReg;    
+    register transmitCheckSumControlReg(0x31) alias TCSCR {
+       READ reserved[7:3];
+       RW UDPCSE[2];
+       RW TCPCSE[1];
+       RW IPCSE[0];
+    }
+
+    //dc_reg <rtxdata_fmt,WRITE> receiveCheckSumControlStatusReg;
+    register receiveCheckSumControlStatusReg(0x32) alias RCSCSR {
+        READ UDPS[7];
+        READ TCPS[6];
+        READ IPS[5];
+        READ UDPP[4];
+        READ TCPP[3];
+        READ IPP[2];
+        RW RCSEN[1];
+        RW DCSE[0];
+    }
+    
+    //dc_reg <rtxdata_fmt,WRITE> memoryDataPre_FetchReadCommandWithoutAddressIncrementReg; MRCMDX
+    register memoryDataPre_FetchReadCommandWithoutAddressIncrementReg(0xF0) alias MRCMDX {
+        READ MRCMDX[7:0];
+    }
+
+    //dc_reg <rtxdata_fmt,WRITE> memoryDataReadCommandWithAddressIncrementRegI; MRCMDX1
+    register memoryDataReadCommandWithAddressIncrementRegI(0xF1) alias MRCMDX1 {
+        READ MRCMDX1[7:0];
+    }
+
+    //dc_reg <rtxdata_fmt,WRITE> memoryDataReadCommandWithAddressIncrementRegII; MRCMD
+    register memoryDataReadCommandWithAddressIncrementRegII(0xF2) alias MRCMD {
+        READ MRCMD[7:0];
+    }
+
+    //dc_reg <rtxdata_fmt,WRITE> memoryDataRead_addressRegisterHighByte; MRRH
+    register memoryDataRead_addressRegister(0xF4) alias MRR {
+        RW MDRAL[15:8];
+        RW MDRAH[7:0];
+    }
+
+    //dc_reg <rtxdata_fmt,WRITE> memoryDataWriteCommandWithoutAddressIncrementRegister; MWCMDX
+    register memoryDataWriteCommandWithoutAddressIncrementReg(0xF6) alias MWCMDXR {
+        WRITE MWCMDX[7:0];
+    }
+    
+    //dc_reg <rtxdata_fmt,WRITE> memoryDataWriteCommandWithAddressIncrementRegister; MWCMD
+    register memoryDataWriteCommandWithAddressIncrementReg(0xF8) alias MWCMDR {
+        WRITE MWCMD[7:0];
+    }
+
+    //dc_reg <rtxdata_fmt,WRITE> memoryDataWrite_addressRegister;
+    register memoryDataWrite_addressRegs(0xFA) alias MWR {
+        RW MDWAL[15:8];
+        RW MDWAH[7:0];
+    }
+    
+    //dc_reg <rtxdata_fmt,WRITE> txPacketLengthReg; TXPL
+    register txPacketLengthReg(0xFC) alias TXPL {
+        RW TXPLL[15:8];
+        RW TXPLH[7:0];
+    }
+    
+    //dc_reg <rtxdata_fmt,WRITE> interruptStatusReg; ISR
+    register interruptStatusReg(0xFE) alias ISR {
+        READ IOMODE[7];
+        READ reserved[6];
+        RW LNKCHG[5];
+        RW UDRUN[4];
+        RW ROO[3];
+        RW ROS[2];
+        RW PT[1];
+        RW PR[0];
+    }
+    
+    //dc_reg <rtxdata_fmt,WRITE> interruptMaskReg; IMR
+    register interruptMaskReg(0xFF) alias IMR {
+        RW PAR[7];
+        READ reserved[6];
+        RW LNKCHGI[5];
+        RW UDRUNI[4];
+        RW ROOI[3];
+        RW ROI[2];
+        RW PTI[1];
+        RW PRI[0];
+    }
+    
+    //dc_reg <rtxdata_fmt,WRITE> EEPROM_PHYControlReg;
+    register EEPROM_PHYControlReg(0x0B) alias EPCR {
+        READ reserved[7:6];
+        RW REEP[5];
+        RW WEP[4];
+        RW EPOS[3];
+        RW ERPRR[2];
+        RW ERPRW[1];
+        READ ERRE[0];
+    }
+    
+    //dc_reg <rtxdata_fmt,WRITE> EEPROM_PHYAddressReg;
+    register EEPROM_PHYAddressReg(0x0C) alias EPAR {
+        RW PHY_ADR[7:6];
+        RW EROA[5:0];
+    }
+    
+    //dc_reg <rtxdata_fmt,WRITE> EEPROM_PHYDataReg;
+    register EEPROM_PHYDataReg(0x0D) alias EPDR {
+        RW EE_PHY_H[7:0];
+        RW EE_PHY_L[7:0];
+    }
+
+    behaviors {
+		r_powerDown.set_actions {
+			GPR.PHYPD = 0;
+		}
+
+		r_powerUp.set_actions {
+			GPR.PHYPD = 1;
+			mindelay(5,US);
+		}
+		
+		r_softwareReset.set_actions {
+			NCR.RST = 1;
+			mindelay(10,US);
+			//NCR.RST = 0
+		}
+
+ 
+		//POWER DOWN REQUIREMENTS
+		r_PHYpowerDownMode.set_actions {
+			GPR.PHYPD = 1;
+		}
+
+		r_MACpowerDownMode.set_actions {
+			BMCR.PD = 1; 
+		}
+
+
+		//POWER UP REQUIREMENTS
+		r_PHYpowerUpMode.set_actions {
+			GPR.PHYPD = 0;
+		}		
+
+		r_MACpowerUpMode.set_actions {
+			BMCR.PD = 0
+		}
+		
+
+
+		// READ EEPROM REQUIREMENTS
+		r_ReadEEPROMDataStep1.set_actions{
+			EPAR.EROA = anyvalue;
+		}
+
+		r_ReadEEPROMDataStep21.set_actions{
+			EPCR.EPOS = 0;
+		}	
+		
+		r_ReadEEPROMDataStep22.set_actions{
+			EPCR.ERPRR = 1;
+		}	
+		
+		r_ReadEEPROMDataStep31.set_actions{
+			ler EPCR e esperar ate EPCR.ERRE = 0                      <<<<<<< como faz esse?
+		}
+
+		r_ReadEEPROMDataStep32.set_actions{
+			mindelay(40,US);
+			EPCR = 0;
+		}
+
+		r_ReadEEPROMDataStep4.set_actions{
+			read EPDR.EE_PHY_H                                         <<<<<<<< read precisa?
+			read low byte EPDR.EE_PHY_L
+		}
+
+
+		// WRITE EEPROM REQUERIMENTS
+		r_WriteEEPROMDataStep1.set_actions{
+			EPAR = anyvalue;
+		}
+		r_WriteEEPROMDataStep21.set_actions{
+			EPDR.EE_PHY_H = anyvalue;
+		}
+		r_WriteEEPROMDataStep22.set_actions{
+			EPDR.EE_PHY_L = anyvalue;
+		}
+		r_WriteEEPROMDataStep31.set_actions{
+			EPCR.WEP = 1;
+		}
+		r_WriteEEPROMDataStep32.set_actions{
+			EPCR.EPOS = 0;
+		}	
+		r_WriteEEPROMDataStep33.set_actions{
+			EPCR.ERPRW = 1;
+		}
+		r_WriteEEPROMDataStep4.set_actions{
+			ler EPCR e esperar EPCR.ERRE = 0;                      <<<aqui
+		}
+		r_WriteEEPROMDataStep5.set_actions{
+			mindelay(500,US);
+			EPCR = 0;
+		}
+		
+
+		//READ PHYREGISTER
+		r_ReadPHYRegisterStep1.set_actions{
+			EPAR = anyvalue;
+		}
+		r_ReadPHYRegisterStep21.set_actions{
+			EPCR.EPOS = 1;
+		}
+		r_ReadPHYRegisterStep22.set_actions{
+			EPCR.ERPRR = 1;
+		}
+		r_ReadPHYRegisterStep3.set_actions{
+			read EPCR REG. 0BH and wait until ERRE Bit [0] = 0 ok, or just following Step 4.  <<<<<<<<<<<
+		}
+		r_ReadPHYRegisterStep4.set_actions{
+			maxdelay(5,US);
+			EPCR = 0x08;
+		}
+		r_ReadPHYRegisterStep5.set_actions{
+			read EPDR.EE_PHY_H                                        <<<<<<<<<<
+			read EPDR.EE_PHY_L
+		}
+
+
+		//WRITE PHY REGISTER
+		r_WritePHYRegisterStep1.set_actions{
+			EPAR = anyvalue;
+		}
+		r_WritePHYRegisterStep21.set_actions{
+			EPDR.EE_PHY_H  = anyvalue;
+		}
+		r_WritePHYRegisterStep22.set_actions{
+			EPDR.EE_PHY_L = anyvalue;
+		}
+		r_WritePHYRegisterStep31.set_actions{
+			EPCR.EPOS = 1;
+		}
+		r_WritePHYRegisterStep32.set_actions{
+			EPCR.ERPRW = 1;
+		}
+		r_WritePHYRegisterStep4.set_actions{
+			read EPCR REG. 0BH and wait until ERRE Bit [0] = 0 ok, or just following Step 5.  <<<<<<<<<<<<<
+		}
+		r_WritePHYRegisterStep5.set_actions{
+			maxdelay(5, US);
+			EPCR = 0x8;
+		}
+
+
+		//PACKET TRANSMISSION		
+		r_PacketTransmissionStep1_byte.set_actions(0xF7 == p_DM9000A_BYTE_MODE){
+		//ssssssssss
+		}
+		r_PacketTransmissionStep1_word.set_actions(0xF7 == p_DM9000A_WORD_MODE){
+		    //sssssssssssssss
+		}
+		r_PacketTransmissionStep21.set_actions{
+		    MWCMD = anyvalue; //address before
+		}
+		r_PacketTransmissionStep22.set_actions{
+		    MDRAH = anyvalue;
+		}
+		r_PacketTransmissionStep23.set_actions{
+		    MDRAL = anyvalue;
+		}	
+		r_PacketTransmissionStep3.set_actions{
+		    TCR.TXREQ = 1;
+		}	
+		
+
+		//RECEIVE INTERRUPT SERVICE ROUTINE
+		ReceiveInterruptServiceRoutineStep1.set_actions{
+			read ISR;
+
+		}		
+		ReceiveInterruptServiceRoutineStep2.set_actions(ISR == p_ReceiveOK){
+			ISR = 0x01;
+		}
+		
+
+		//NotreadyPacketReception
+		r_NotreadyPacketReception.set_actions(MRCMDX == p_ReceivedOK){
+			IMR = 0x80;
+			ISR = 0x0F;
+			NSR = 0x05;
+			r_softwareReset;
+		}
+		
+    };
+    
+    bindings {
+        //...
+        r_powerUp requires r_powerDown before with mindelay(20,MS); //imediato ou não
+        r_PacketTransmissionStep21 requires r_PacketTransmissionStep1_byte, r_PacketTransmissionStep1_word before;
+        r_PacketTransmissionStep22 requires r_PacketTransmissionStep1_byte, r_PacketTransmissionStep1_word before;
+        r_PacketTransmissionStep23 requires r_PacketTransmissionStep1_byte, r_PacketTransmissionStep1_word before;
+        r_PacketTransmissionStep3 requiresall r_PacketTransmissionStep21,r_PacketTransmissionStep22,r_PacketTransmissionStep23 before;
+	r_ReadEEPROMDataStep21 requires r_ReadEEPROMDataStep1 before;
+	r_ReadEEPROMDataStep22 requires r_ReadEEPROMDataStep1 before;
+	r_ReadEEPROMDataStep31 requiresall r_ReadEEPROMDataStep21, r_ReadEEPROMDataStep22 before;
+	r_ReadEEPROMDataStep32 requiresall r_ReadEEPROMDataStep21, r_ReadEEPROMDataStep22 before;
+	r_ReadEEPROMDataStep4 requires r_ReadEEPROMDataStep31, r_ReadEEPROMDataStep32 before;             <<<< quis dizer q requer step31 ou step32, está correto?
+        r_WriteEEPROMDataStep21 requires r_WriteEEPROMDataStep1 before;
+	r_WriteEEPROMDataStep22 requires r_WriteEEPROMDataStep1 before;
+	r_WriteEEPROMDataStep31 requires r_WriteEEPROMDataStep12, r_WriteEEPROMDataStep22 before;
+	r_WriteEEPROMDataStep32 requires r_WriteEEPROMDataStep12, r_WriteEEPROMDataStep22 before;
+	r_WriteEEPROMDataStep33 requires r_WriteEEPROMDataStep12, r_WriteEEPROMDataStep22 before;
+	r_WriteEEPROMDataStep4 requiresall r_WriteEEPROMDataStep31, r_WriteEEPROMDataStep32, r_WriteEEPROMDataStep33 before;
+	r_WriteEEPROMDataStep5 requires r_WriteEEPROMDataStep4 before;
+	r_ReadPHYRegisterStep21 requires r_ReadPHYRegisterStep1 before;
+	r_ReadPHYRegisterStep22 requires r_ReadPHYRegisterStep1 before;
+	r_ReadPHYRegisterStep3 requiresall r_ReadPHYRegisterStep21, r_ReadPHYRegisterStep22 before;
+	r_ReadPHYRegisterStep4 requires r_ReadPHYRegisterStep3 before;
+	r_ReadPHYRegisterStep5 requires r_ReadPHYRegisterStep4 before;
+	r_WritePHYRegisterStep21 requires r_WritePHYRegisterStep1 before;
+	r_WritePHYRegisterStep22 requires r_WritePHYRegisterStep1 before;
+	r_WritePHYRegisterStep31 requiresall r_WritePHYRegisterStep21, r_WritePHYRegisterStep22 before;
+	r_WritePHYRegisterStep32 requires r_WritePHYRegisterStep2 before;
+	r_WritePHYRegisterStep4 requiresall r_WritePHYRegisterStep31, r_WritePHYRegisterStep32 before;
+	r_WritePHYRegisterStep5 requires r_WritePHYRegisterStep4 before;
+	r_ReceiveInterruptServiceRoutineStep2 requires r_ReceiveInterruptServiceRoutineStep1 before;
+
+	//Adding Constraints to the Services
+        s_powerOnReset.add_constraints(r_powerUp, r_powerDown);
+        s_softwareReset.add_constraints(r_softwareReset);
+        s_PHYpowerDownMode.add_constraints(r_PHYpowerDownMode);
+        s_MACpowerDownMode.add_constraints(r_MACpowerDownMode);
+	s_PHYpowerUpMode.add_constraints(r_PHYpowerUpMode);
+	s_MACpowerUpMode.add_constraints(r_MACpowerUpMode);
+        s_PacketReception.add_constraints(r_NotreadyPacketReception);
+	s_PacketTransmission(r_PacketTransmissionStep1_byte, r_PacketTransmissionStep1_word, r_PacketTransmissionStep21, r_PacketTransmissionStep22,r_PacketTransmissionStep23, r_PacketTransmissionStep3);
+	s_ReadEEPROM.add_constraints(ReadEEPROMDataStep1,ReadEEPROMDataStep21,ReadEEPROMDataStep22,ReadEEPROMDataStep31,ReadEEPROMDataStep32,ReadEEPROMDataStep4); << 		poe todos aqui?
+	
+	s_WriteEEPROMData.add_constraints(r_WriteEEPROMDataStep1, r_WriteEEPROMDataStep21,r_WriteEEPROMDataStep22, r_WriteEEPROMDataStep31, r_WriteEEPROMDataStep32, r_WriteEEPROMDataStep33, r_WriteEEPROMDataStep4,r_WriteEEPROMDataStep5);
+	s_ReadPHYRegister.add_constraints(r_ReadPHYRegisterStep1,  r_ReadPHYRegisterStep21,r_ReadPHYRegisterStep22,r_ReadPHYRegisterStep3,r_ReadPHYRegisterStep4,r_ReadPHYRegisterStep5);
+	s_WritePHYRegister.add_constraints(r_WritePHYRegisterStep1,r_WritePHYRegisterStep21,r_WritePHYRegisterStep21,r_WritePHYRegisterStep31,r_WritePHYRegisterStep32,r_WritePHYRegisterStep4,r_WritePHYRegisterStep5);
+	s_ReceiveInterruptServiceRoutine.add_constraints(r_ReceiveInterruptServiceRoutineStep1,r_ReceiveInterruptServiceRoutineStep2);
+	s_NotreadyPacketReception.add_constraints(r_NotreadyPacketReception);
+	s_CheckPacketStatusAndLength.add_constraints(r_CheckPacketStatusAndLength);
+    };
+};

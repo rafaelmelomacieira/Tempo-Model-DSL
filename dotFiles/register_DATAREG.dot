@@ -1,0 +1,6 @@
+digraph DATAREG{
+node [shape = "record" 
+ style="filled" ];
+node0 [ label = "[0:15] DATA[RW]"
+ fillcolor = "green"];
+}

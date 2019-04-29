@@ -1,0 +1,12 @@
+digraph PHYDN{
+PHYDN[shape="Mdiamond"];
+SWRST -> PHYDN [label = "p5 && p12"];
+SWRST -> PHYDN [label = "p7 && p11"];
+PHYDN -> SWRST [label = "p13 && p14"];
+PHYUP -> PHYDN [label = "p7 && p11"];
+PHYUP -> SWRST [label = "p13 && p14"];
+PHYUP -> PHYDN [label = "p5 && p12"];
+PHYDN -> PHYUP [label = "p5 && p6"];
+PHYDN -> PHYUP [label = "p7 && p8"];
+PHYDN -> SWRST [label = "p9 && p10"];
+}

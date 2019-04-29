@@ -1,0 +1,52 @@
+<%@jet package="br.ufpe.cin.greco.devc.languageStructure.tdevctemplate" imports="br.ufpe.cin.greco.devc.languageStructure.* java.util.*" class="TDEVCMakefile" %>
+<%TDCCheckerGenerator tdgen = (TDCCheckerGenerator)argument;%>
+##############################################
+##Makefile _ <%=tdgen.getProjectName()%> - Temporal DevC
+##############################################  
+##					    ##
+##  UFPE/CIn - Greco			    ##
+##					    ##
+##  By Rafael Melo Macieira		    ##
+##  rmm2@cin.ufpe.br			    ##
+##############################################
+##
+##############################################
+
+APPNAME = <%=tdgen.getProjectName()%>
+BUILDPATH = build/
+#BUILDPATH = 
+BUILDFILE = $(BUILDPATH)$@
+OBJS = $(BUILDPATH)tdc_automata.o \
+<%for (String service : tdgen.getServices().keySet()) {%>
+$(BUILDPATH)tdc_automata_<%=service%>.o \
+<%}%>
+$(BUILDPATH)tdc_automata_engine.o #$(BUILDPATH)main.o
+MAINFILE = $(CPPPATH)main.cpp
+CC = g++
+OUTPUT = $(APPNAME).x
+CFLAG = -o $(OUTPUT)
+CPPPATH = 
+HEADERPATH = headers/
+#HEADERPATH = 
+HEADERS = $(HEADERPATH)*.h  #tdc_automata_drv_init.h $(HEADERPATH)tdc_automata_drv_send_data_pre.h $(HEADERPATH)tdc_automata.h
+
+#$(OUTPUT) : $(OBJS)
+#	$(CC) $(OBJS) $(MAINFILE) $(CFLAG)
+all: $(OBJS)
+	@ar cr lib$(APPNAME).a $(OBJS)
+	@echo ""
+	@echo "** Finalizado!"
+
+#main.o : $(MAINFILE) $(HEADERS) main.h
+#	$(CC) -c $(MAINFILE) -o $(BUILDFILE)
+
+$(BUILDPATH)%.o : %.cpp $(HEADERPATH)%.h #$(HEADERPATH)tdc_automata.h
+	 $(CC) -c $< -o $@
+
+clean:
+	@echo "\nRemovendo $(OBJS) e $(OUTPUT)\n"
+	rm -f $(BUILDPATH)*.o $(OUTPUT) *~ $(HEADERPATH)*~
+	@echo ""
+	@echo "** Finalizado!"
+
+clean-do: clear $(OUTPUT)

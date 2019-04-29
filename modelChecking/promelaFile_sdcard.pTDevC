@@ -1,0 +1,286 @@
+233
+reg%PID ................
+cmp%PID%PIDL
+cmp%PID%PIDH
+reg%WCR ........
+cmp%WCR%LINKST
+cmp%WCR%MAGICEN
+cmp%WCR%SAMPLEEN
+cmp%WCR%LINKEN
+cmp%WCR%MAGICST
+cmp%WCR%SAMPLEST
+reg%MWCMDR ........
+cmp%MWCMDR%MWCMD
+reg%SMCR ........
+cmp%SMCR%FB1
+cmp%SMCR%FB0
+cmp%SMCR%SM_EN
+cmp%SMCR%FLC
+reg%OCR ........
+cmp%OCR%SCS
+cmp%OCR%SCC
+cmp%OCR%SOE
+cmp%OCR%PHYOP
+reg%TSRII ........
+cmp%TSRII%LATEC
+cmp%TSRII%COL
+cmp%TSRII%LOSSC
+cmp%TSRII%NC
+cmp%TSRII%TJTO
+cmp%TSRII%EC
+reg%DATAREG ................
+cmp%DATAREG%DATA
+reg%TCR ........
+cmp%TCR%TXREQ
+cmp%TCR%CRC_DIS2
+cmp%TCR%CRC_DIS1
+cmp%TCR%PAD_DIS2
+cmp%TCR%PAD_DIS1
+cmp%TCR%EXCECM
+cmp%TCR%TJDIS
+reg%TCSCR ........
+cmp%TCSCR%IPCSE
+cmp%TCSCR%TCPCSE
+cmp%TCSCR%UDPCSE
+reg%TRPA ................
+cmp%TRPA%TRPAL
+cmp%TRPA%TRPAH
+reg%TSRI ........
+cmp%TSRI%LATEC
+cmp%TSRI%COL
+cmp%TSRI%LOSSC
+cmp%TSRI%NC
+cmp%TSRI%TJTO
+cmp%TSRI%EC
+reg%EPDR ................
+cmp%EPDR%EE_PHY_L
+cmp%EPDR%EE_PHY_H
+reg%NCR ........
+cmp%NCR%WAKEEN
+cmp%NCR%RST
+cmp%NCR%LBK
+cmp%NCR%FCOL
+cmp%NCR%FDX
+reg%BPTR ........
+cmp%BPTR%BPHW
+cmp%BPTR%JPT
+reg%EPCR ........
+cmp%EPCR%ERRE
+cmp%EPCR%ERPRR
+cmp%EPCR%WEP
+cmp%EPCR%REEP
+cmp%EPCR%ERPRW
+cmp%EPCR%EPOS
+reg%IMR ........
+cmp%IMR%PAR
+cmp%IMR%ROOI
+cmp%IMR%PTI
+cmp%IMR%LNKCHGI
+cmp%IMR%PRI
+cmp%IMR%ROI
+cmp%IMR%UDRUNI
+reg%MAR6 ........
+cmp%MAR6%MAB
+reg%MRCMD ........
+cmp%MRCMD%MRCMD
+reg%MAR7 ........
+cmp%MAR7%MAB
+reg%MAR4 ........
+cmp%MAR4%MAB
+reg%ISR ........
+cmp%ISR%UDRUN
+cmp%ISR%PR
+cmp%ISR%ROO
+cmp%ISR%PT
+cmp%ISR%IOMODE
+cmp%ISR%ROS
+cmp%ISR%LNKCHG
+reg%MAR5 ........
+cmp%MAR5%MAB
+reg%CHIPR ........
+cmp%CHIPR%CHIPR
+reg%MAR2 ........
+cmp%MAR2%MAB
+reg%MDRALR ........
+cmp%MDRALR%MDRAL
+reg%MAR3 ........
+cmp%MAR3%MAB
+reg%FCR ........
+cmp%FCR%TXP0
+cmp%FCR%BKPA
+cmp%FCR%RXPCS
+cmp%FCR%FLCE
+cmp%FCR%BKPM
+cmp%FCR%TXPEN
+cmp%FCR%TXPF
+cmp%FCR%RXPS
+reg%MAR0 ........
+cmp%MAR0%MAB
+reg%MAR1 ........
+cmp%MAR1%MAB
+reg%BMCR ................
+cmp%BMCR%LOOPBACK
+cmp%BMCR%COLLISION_TEST
+cmp%BMCR%AUTO_NEG_ENA
+cmp%BMCR%POWER_DN
+cmp%BMCR%RESTART
+cmp%BMCR%RESET
+cmp%BMCR%SPEEDSEL
+cmp%BMCR%DUPLEXMODE
+cmp%BMCR%ISOLATE
+reg%MWCMDXR ........
+cmp%MWCMDXR%MWCMDX
+reg%ETXCSR ........
+cmp%ETXCSR%ETT
+cmp%ETXCSR%ETE
+cmp%ETXCSR%ETS1
+cmp%ETXCSR%ETS2
+reg%TCR2 ........
+cmp%TCR2%RLCP
+cmp%TCR2%DTU
+cmp%TCR2%LED
+cmp%TCR2%IFGS
+cmp%TCR2%ONEPM
+reg%RCR ........
+cmp%RCR%WTDIS
+cmp%RCR%ALL
+cmp%RCR%DIS_CRC
+cmp%RCR%PRMSC
+cmp%RCR%RXEN
+cmp%RCR%DIS_LONG
+cmp%RCR%RUNT
+reg%ROCR ........
+cmp%ROCR%RXFU
+cmp%ROCR%ROC
+reg%EPAR ........
+cmp%EPAR%PHY_ADR
+cmp%EPAR%EROA
+reg%MRCMDX ........
+cmp%MRCMDX%MRCMDX
+reg%PAR3 ........
+cmp%PAR3%PAB
+reg%PAR2 ........
+cmp%PAR2%PAB
+reg%PAR1 ........
+cmp%PAR1%PAB
+reg%PAR0 ........
+cmp%PAR0%PAB
+reg%RSR ........
+cmp%RSR%CE
+cmp%RSR%AE
+cmp%RSR%RF
+cmp%RSR%RWTO
+cmp%RSR%PLE
+cmp%RSR%MF
+cmp%RSR%FOE
+cmp%RSR%LCS
+reg%PAR5 ........
+cmp%PAR5%PAB
+reg%PAR4 ........
+cmp%PAR4%PAB
+reg%INDEXREG ................
+cmp%INDEXREG%INDEX
+reg%RWPA ................
+cmp%RWPA%RWPAL
+cmp%RWPA%RWPAH
+reg%MWR ................
+cmp%MWR%MDWAL
+cmp%MWR%MDWAH
+reg%MRR ................
+cmp%MRR%MDRAL
+cmp%MRR%MDRAH
+reg%GPR ........
+cmp%GPR%GPO
+cmp%GPR%PHYPD
+cmp%GPR%GPIO
+reg%FCTR ........
+cmp%FCTR%LWOT
+cmp%FCTR%LWOT%AS
+cmp%FCTR%LWOT%AD
+cmp%FCTR%LWOT%AF
+cmp%FCTR%LWOT%AG
+cmp%FCTR%HWOT
+reg%VID ................
+cmp%VID%VIDL
+cmp%VID%VIDH
+reg%RCSCSR ........
+cmp%RCSCSR%TCPS
+cmp%RCSCSR%UDPS
+cmp%RCSCSR%RCSEN
+cmp%RCSCSR%IPP
+cmp%RCSCSR%TCPP
+cmp%RCSCSR%UDPP
+cmp%RCSCSR%IPS
+cmp%RCSCSR%DCSE
+reg%NSR ........
+cmp%NSR%SPEED
+cmp%NSR%LINKST
+cmp%NSR%TX1END
+cmp%NSR%WAKEST
+cmp%NSR%RXOV
+cmp%NSR%TX2END
+reg%GPCR ........
+cmp%GPCR%GPC31
+cmp%GPCR%GPC64
+reg%MDRAHR ........
+cmp%MDRAHR%MDRAH
+reg%MRCMDX1 ........
+cmp%MRCMDX1%MRCMDX1
+var%rxlen ................................
+var%rxlowlen ................................
+var%txlen ................................
+var%pkgcounter ................................
+var%t1 ................................
+pat%RXNOERROR ....0000
+20
+est%UNDEF_OPER_MODE
+WRITE%reg%MDRALR
+WRITE%reg%MDRAHR
+est%TXWRPKGIDLE
+est%TXSDPKGSDING
+est%TXWRPKGLEN
+est%OPER16BITS
+var%txlen == null
+var%txlen == null
+est%OPER8BITS
+est%RXPKGPAYLOAD
+est%PHYUP
+cmp%RCR%PRMSC != 1
+est%RXPKGHEADERERR
+READ%reg%MRCMD
+est%UP
+est%TXSDPKGIDLE
+est%RXPKGIDLE
+WRITE%cmp%BMCR%POWERDN && cmp%BMCR.POWERDN
+WRITE%cmp%GPR%PHYPD && cmp%GPR.PHYPD
+Global_State%PromiscuousMode%[](q12)%Global_State%ForceResetAndStopReadingOnRXError%[](q13 -> q14)%Global_State%UndefOperMode%[](q11 -> !q0)%Global_State%rxtxinterruption%[](q11 -> (!(q3 && q16 && q17) -> !(q18 || q19)))
+.RXPKGLOWLEN
+.PHYDN
+.TXWRPKGLEN
+.DOWN
+.TXWRPKGIDLE
+.TXSDPKGIDLE
+.RXPKGHEADERERR
+.OPER16BITS
+.RXPKGSTATUS
+.RXPKGIDLE
+.PHYUP%WriteBeforeLen%[]((q1 || q2) -> !q3)%PHYUP%UndefinedOperMode%[](!q0)%PHYUP%LenBeforeSend%!q4 U q5%PHYUP%NeverLenAndSend%[](!(q4 && q5))%PHYUP%TXLenPPT%[](q4 -> ((q6 -> ((q7) || (q8))) && (q9 -> (q7))))
+..RXPKGLOWLEN
+..RXPKGIDLE
+..TXWRPKGLEN
+..TXSDPKGSDING
+..TXWRPKGIDLE
+..RXPKGPAYLOAD
+..RXPKGHIGHLEN
+..TXSDPKGIDLE
+..TXWRPKGWR
+..RXPKGHEADERERR
+..RXPKGSTATUS
+.TXSDPKGSDING
+.SWRST
+.RXPKGPAYLOAD
+.RXPKGHIGHLEN
+.TXWRPKGWR
+.OPER8BITS
+.UP
+.UNDEF_OPER_MODE

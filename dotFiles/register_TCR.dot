@@ -1,0 +1,20 @@
+digraph TCR{
+node [shape = "record" 
+ style="filled" ];
+node0 [ label = "[0] TXREQ[RW]"
+ fillcolor = "green"];
+node1 [ label = "[1] CRC_DIS1[RW]"
+ fillcolor = "green"];
+node2 [ label = "[2] PAD_DIS1[RW]"
+ fillcolor = "green"];
+node3 [ label = "[3] CRC_DIS2[RW]"
+ fillcolor = "green"];
+node4 [ label = "[4] PAD_DIS2[RW]"
+ fillcolor = "green"];
+node5 [ label = "[5] EXCECM[RW]"
+ fillcolor = "green"];
+node6 [ label = "[6] TJDIS[RW]"
+ fillcolor = "green"];
+node7 [ label = "[7] RESERVED[--]"
+ fillcolor = "red"];
+}

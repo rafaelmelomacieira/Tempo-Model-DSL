@@ -1,0 +1,207 @@
+%    UFPE - CIN - Grupo de Engenharia da Computao  %
+%____________________________________________________%
+
+%    http://www.cin.ufpe.br/~greco/                  %
+
+%    Plano da Dissertao de Mestrado                %
+
+%    [Incio: 16.02.2004]                            %
+
+%    [Trmino: 05.03.2004]                           %
+
+%____________________________________________________%
+
+
+
+%% Template para dissertao/tese na classe UFPEthesis
+%% verso 0.7
+%% (c) 2003 Paulo G. S. Fonseca
+%% www.cin.ufpe.br/~paguso/ufpethesis
+
+%% Carrega a classe ufpethesis
+%% Opes: bsc - para monografias de graduao -- Adapatado para o Plano de Dissertao
+%%         msc - (padro) para dissertaes de mestrado
+%%         phd - para teses de doutorado
+%\documentclass[msc]{ufpethesis}
+\documentclass[pt,oneside,onehalfspacing]{risethesis}
+
+
+
+%--- Pacotes: ---%
+
+
+%%\usepackage[brazil]{babel}     %--- Nomes dos captulos, sees, etc em portugus ---%
+% \usepackage[latin1]{inputenc}
+%%\usepackage{amsmath}
+%%\usepackage{epsfig}
+%%\usepackage{latexsym}
+%%\usepackage{lscape}            %% pacote para utilizar pgina em "landscape"
+
+%--- Adiciona as referncias bibliogrficas no sumrio ---- %
+%%\usepackage[nottoc]{tocbibind}          %-- opo: [nottoc], serve pra no incluir o prprio sumrio
+
+\usepackage{natbib}
+\usepackage{babel}
+\usepackage{supertabular}
+\usepackage{fancybox}
+\usepackage{acronym}
+\usepackage{color}
+\usepackage{listings} 
+
+\lstset{ %
+basicstyle=\footnotesize,       % the size of the fonts that are used for the code
+numbers=left,                   % where to put the line-numbers
+numberstyle=\footnotesize,      % the size of the fonts that are used for the line-numbers
+%stepnumber=2,                   % the step between two line-numbers. If it's 1, each line 
+                                % will be numbered
+numbersep=5pt,                  % how far the line-numbers are from the code
+backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+showspaces=false,               % show spaces adding particular underscores
+showstringspaces=false,         % underline spaces within strings
+showtabs=false,                 % show tabs within strings adding particular underscores
+frame=single,                   % adds a frame around the code
+tabsize=2,                      % sets default tabsize to 2 spaces
+captionpos=b,                   % sets the caption-position to bottom
+breaklines=true,                % sets automatic line breaking
+breakatwhitespace=true,        % sets if automatic breaks should only happen at whitespace
+title=\lstname,                 % show the filename of files included with \lstinputlisting;
+                                % also try caption instead of title
+escapeinside={\%*}{*)},         % if you want to add a comment within your code
+morekeywords={*,...}            % if you want to add more keywords to the set
+}
+
+
+%\usepackage{algorithmic}
+
+
+%--- Prooftree style ---%
+%\input{prooftree.sty}
+
+
+%-- Abreviaes --%
+\newcommand{\X}{\textbullet}
+\newcommand{\dd}{{\it device driver}}
+\newcommand{\Dd}{{\it Device driver}}
+\newcommand{\dds}{{\it device drivers}}
+\newcommand{\Dds}{{\it Device drivers}}
+\newcommand{\driver}{{\it driver}}
+\newcommand{\Driver}{{\it Driver}}
+\newcommand{\drivers}{{\it drivers}}
+\newcommand{\Drivers}{{\it Drivers}}
+
+%---------------------------------------%
+
+
+
+%-----------------------------------------%
+
+%% Identificao:
+
+\address{Recife}
+
+\universitypt{Universidade Federal de Pernambuco}
+\universityen{Federal University of Pernambuco}
+
+\departmentpt{Centro de Informática}
+\departmenten{Center for Informatics}
+
+\programpt{Pós-graduação em Ciência da Computação}
+\programen{Graduate in Computer Science}
+
+\majorfieldpt{Ciência da Computação}
+\majorfielden{Computer Science}
+
+%\title{Um Mecanismo para Validaï¿½ï¿½o Semi-formal de Device Drivers em Projetos Baseados em Plataformas}
+\title{TDevC Specification and Tools}
+%\title{Checagem de Device Drivers a partir de uma DSL}
+\date{Setembro/2011}
+
+\author{Rafael Melo Macieira}
+\adviser[f]{Edna Natividade da Silva Barros}
+
+%------------------------------------------------%
+
+
+
+
+\begin{document}
+
+
+%%
+%% Parte pr-textual
+%%
+\frontmatter
+
+% Folha de rosto
+% Comente para ocultar
+\frontpage
+
+% Portada (apresentao)
+% Comente para ocultar
+\presentationpage
+\begin{dedicatory}
+Eu dedico esta dissertaï¿½ï¿½o ï¿½ minha famï¿½lia, amigos, professores e todos aqueles que me apoiaram nesta etapa da minha vida.
+\end{dedicatory}
+
+%----------------------------
+
+\acknowledgements
+%\input{dissertacao_rmm2_agradecimentos}
+
+\begin{epigraph}[]{Kramer, C.}
+A rule is a rule and let's face it! Without rules there's chaos!
+%\vspace{0.5cm}
+%It's my freedom, can't take it from me, i know it, it\\
+%won't change, but we need some understanding, I know\\
+%we'll be all right.
+\end{epigraph}
+
+
+\resumo
+%\input{dissertacao_rmm2_resumo}
+\abstract
+%\input{dissertacao_rmm2_abstract}
+
+%---------------------------
+
+
+% Sumrio
+\tableofcontents
+
+% Lista de figuras
+% Comente para ocultar
+\listoffigures
+
+% Lista de tabelas
+% Comente para ocultar
+\listoftables
+% Acronyms
+%\input{dissertacao_rmm2_acronyms}
+%%
+%% Parte textual
+%%
+\mainmatter
+
+\input{tdevc}
+\input{formalism}
+
+
+
+%\nocite{*}
+%%\bibliographystyle{natbib}%{acm}%{alpha}
+%%\addcontentsline{toc}{chapter}{Referï¿½ncias Bibliogrï¿½ficas}
+%%\bibliography{pre}%{bibliografia}
+
+%\colophon
+% Appendix
+\clearpage
+\addappheadtotoc
+\appendix
+\appendixpage
+\input{tdevc_appendix_bnf}
+%\include{dissertacao_rmm2_appendix_bnf} \label{ap:bnf}
+%\include{dissertacao_rmm2_appendix_report} \label{ap:report}
+
+\end{document}
+
+%_________________________________________%

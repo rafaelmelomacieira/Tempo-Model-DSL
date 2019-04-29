@@ -1,0 +1,34 @@
+import "mysensors.terminus";
+import "myactuators.terminus";
+
+plaform (uClinuxNiosV2) {
+
+    device mysensors alias mys;
+    device myactuators alias mya;
+    
+    //pattern CHANNEL3EN =   mask(...............1........);
+
+
+globalstate {
+    addproperty(critical) Channel1Safety {
+       ltlf(
+          [](mys.Channel1On -> mya->Channel1On)
+           )
+    }
+    addproperty(critical) Channel2Safety {
+       ltlf(
+          [](mys.Channel2On -> mya->Channel2On)
+           )
+    }
+    addproperty(critical) Channel3Safety {
+       ltlf(
+          [](mys.Channel3On -> mya->Channel3On)
+           )
+    }
+    addproperty(critical) Channel4Safety {
+       ltlf(
+          [](mys.Channel4On -> mya->Channel4On)
+           )
+    }
+  }
+}

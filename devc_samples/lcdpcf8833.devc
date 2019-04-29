@@ -1,0 +1,114 @@
+import aaaa;
+import bbbb;
+import cccc;
+
+DEVC(lcdpcf8833){
+    dc_service <VOID> lcdpcf8833_init;   
+    dc_service <VOID> lcdpcf8833_reset;
+    dc_service <VOID> lcdpcf8833_nop;
+    dc_service <VOID> lcdpcf8833_sleepout;
+    dc_service <VOID> lcdpcf8833_bstron;
+    dc_service <VOID> lcdpcf8833_invon;
+    dc_service <VOID> lcdpcf8833_madctl;
+    dc_service <VOID> lcdpcf8833_colmod;
+    dc_service <VOID> lcdpcf8833_setcon pos {lcdpcf8833_ramwr max_delay(5,MS)} pre {lcdpcf8833_init};
+    dc_service <VOID> lcdpcf8833_dispon;
+    dc_service <VOID> lcdpcf8833_ramwr;
+    dc_service <VOID> lcdpcf8833_setrgb pos {lcdpcf8833_ramwr min_delay(60,MS)};
+    dc_format reg_fmt = "%cmd:1%data:8";
+    dc_reg <reg_fmt,RW> main_reg;
+    dc_drv_map reg_map {
+        payload = main_reg;
+        extra = reg2;
+    }
+
+    behavior{
+        lcdpcf8833_init.set_actions(){
+            lcdpcf8833_reset();
+        	lcdpcf8833_sleepout();
+        	lcdpcf8833_bstron();
+        	lcdpcf8833_invon();
+        	//lcdpcf8833_madctl(dev, 0x88);
+            lcdpcf8833_madctl();
+        	//lcdpcf8833_colmod(dev, 0x03);
+            lcdpcf8833_colmod();
+        	//lcdpcf8833_setcon(dev, 65);
+            lcdpcf8833_setcon();
+        	lcdpcf8833_nop();
+        	lcdpcf8833_dispon();
+        }
+        
+        lcdpcf8833_reset.set_actions(){
+            must{ 
+                reg_map.payload = 221;
+                lcdpcf8833_nop();
+                reg_map.payload = 222;
+            }
+            main{
+                reg_map.payload = 21;
+                reg_map.payload = 22;
+            }
+        }
+        
+        lcdpcf8833_sleepout.set_actions(){
+            reg_map.payload = 821;
+            reg_map.payload = 22;
+        }
+        
+        lcdpcf8833_bstron.set_actions(){
+            reg_map.payload = 921;
+            reg_map.payload = 22;
+        }
+        
+        lcdpcf8833_invon.set_actions(){
+            reg_map.payload = 1021;
+            reg_map.payload = 22;
+        }
+        
+        lcdpcf8833_madctl.set_actions(){
+            reg_map.payload = 1121;
+            reg_map.payload = 22;
+        }
+        
+        lcdpcf8833_colmod.set_actions(){
+            reg_map.payload = 1221;
+            reg_map.payload = 22;
+        }
+
+        lcdpcf8833_setcon.set_actions(){
+            reg_map.payload = 1321;
+            max_delay(20,NS);
+            reg_map.payload = 22;
+        }
+
+        lcdpcf8833_dispon.set_actions(){
+            reg_map.payload = 1421;
+            reg_map.payload = 22;
+        }
+
+        lcdpcf8833_setrgb.set_actions(){
+            reg_map.payload = 1521;
+            max_delay(10,MS);
+            reg_map.payload = 22;
+        }        
+        
+        lcdpcf8833_nop.set_actions(){
+            might{ 
+                reg_map.payload = 221;
+                min_delay(60,MS);
+                reg_map.payload = 322;
+            }
+            main{
+                reg_map.payload = 31;
+                reg_map.payload = 13;
+            }
+        }
+        lcdpcf8833_ramwr.set_actions(){
+            reg_map.payload = 41;
+            reg_map.payload = 14;
+        }
+        
+        main_reg.set_address(0);
+        reg2.set_address(4);
+    }
+}

@@ -1,0 +1,58 @@
+<%@jet package="br.ufpe.cin.greco.devc.languageStructure.tdevctemplate.ccode" imports="br.ufpe.cin.greco.devc.languageStructure.* java.util.*" class="TDEVCHeaderAutomataEngineC" %>
+<%TDCCheckerGenerator tdgen = (TDCCheckerGenerator)argument;%>
+/*************************************************************************/
+/***********               tdc_automata_engine.h      		**********/
+/*************************************************************************/
+/*************************************************************************/
+/*********** 		        UFPE/Cin - Greco		**********/
+/*********** 		 http://www.cin.ufpe.br/~greco 		**********/
+/*********** 		    Copyright(C) 2011, 2012     	**********/
+/***********							**********/
+/*********** 		    By Rafael Melo Macieira		**********/
+/***********							**********/
+/***********		    E-mail: rmm2@cin.ufpe.br		**********/
+/*************************************************************************/
+/*************************************************************************/
+/**		 Automata Reference for the temporal check		 */
+/**	   	 Automatas Configuration Class                           */
+/*************************************************************************/
+
+#ifndef TDC_AUTOMATA_ENGINE_H
+#define TDC_AUTOMATA_ENGINE_H
+
+#include <stdio.h>
+#include <string.h>
+#include "tdc_automata.h"
+<%for (String service : tdgen.getServices().keySet()) {%>
+#include "tdc_automata_<%=service%>.h"
+<%}%>
+
+struct TDC_Automata_Engine {
+  struct VarList *mainVarList;
+  struct AutomataList *mainAutomataList;
+  struct TDC_Automata *currentAutomata;
+  struct VarList *currentVarList;
+  //VarList *tmpCurrentVarList;
+  int runStepNow;
+  int inAutomata;
+  int isLastRead;
+  unsigned int tmpReadedPlatformAddr;
+  unsigned int lastReadedPlatformAddr;
+  unsigned int lastReadedData;
+  char* errorMsgs[15];
+  int errorCount;
+  //std::ofstream reportFile;
+};
+
+void checkThisVar(struct TDC_Automata_Engine *engine, unsigned int platformAddr);
+void runStep(struct TDC_Automata_Engine *engine, char access_type, unsigned int data);
+int isVarToCheck(unsigned int platformAddr);
+char* internalRunStep(struct TDC_Automata_Engine *engine, char access_type, unsigned int data, int* rError);
+void printReport(struct TDC_Automata_Engine *engine);
+void printDataReport(struct TDC_Automata_Engine *engine, FILE *reportFile);
+void printFlowReport(struct TDC_Automata_Engine *engine, FILE *reportFile);
+void printErrorReport(struct TDC_Automata_Engine *engine, FILE *reportFile);
+//void cleanUpdate();
+
+
+#endif

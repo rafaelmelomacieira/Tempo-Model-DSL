@@ -1,0 +1,8 @@
+digraph BPTR{
+node [shape = "record" 
+ style="filled" ];
+node0 [ label = "[0:3] JPT[RW]"
+ fillcolor = "green"];
+node1 [ label = "[4:7] BPHW[RW]"
+ fillcolor = "green"];
+}

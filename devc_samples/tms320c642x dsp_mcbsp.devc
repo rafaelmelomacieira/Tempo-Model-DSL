@@ -1,0 +1,214 @@
+device(tms320c642x_dsp_mcbsp){
+
+    // ****** Patterns' Declarations ******
+    //Loopback Mode Pattern
+    //pattern LKBNormalPattern = 0x91;
+    //pattern IFGS96bIPattern = mask(0...);
+    //pattern ETT75Pattern = 3;
+    pattern IFGS80bPattern = 0x10;
+
+    // ****** Services' Declarations ******
+
+    service s_mcbspSampleRateGenReset;
+    service s_mcbspReceiveReset;
+    service s_mcbspTransmitReset;
+    service s_mcbspReceiveInit;
+    service s_mcbspTransmitInit;
+    service s_mcbspInit;
+    
+    // ****** Services' Declarations ******
+    requirement r_timeRestriction;
+    requirement r_BaudRestriction;
+    requirement r_BaudRestriction2;
+    requirement r_BaudRestriction3;
+    
+    // ****** Services' Declarations ******    
+    exception e_timeBoundery;
+
+    // ****** Formats' Declarations ******
+    format enhancedReceivedChannelEnableFmt {
+        RW RCE31[31];RW RCE30[30];RW RCE29[29];RW RCE28[28];
+        RW RCE27[27];RW RCE26[26];RW RCE25[25];RW RCE24[24];
+        RW RCE23[23];RW RCE22[22];RW RCE21[21];RW RCE20[20];
+        RW RCE19[19];RW RCE18[18];RW RCE17[17];RW RCE16[16];
+        RW RCE15[15];RW RCE14[14];RW RCE13[13];RW RCE12[12];
+        RW RCE11[11];RW RCE10[10];RW RCE9[9];RW RCE8[8];
+        RW RCE7[7];RW RCE6[6];RW RCE5[5];RW RCE4[4];
+        RW RCE3[3];RW RCE2[2];RW RCE1[1];RW RCE0[0];
+    };
+    
+    format enhancedTransmitChannelEnableFmt {
+        RW XCE31[31];RW XCE30[30];RW XCE29[29];RW XCE28[28];
+        RW XCE27[27];RW XCE26[26];RW XCE25[25];RW XCE24[24];
+        RW XCE23[23];RW XCE22[22];RW XCE21[21];RW XCE20[20];
+        RW XCE19[19];RW XCE18[18];RW XCE17[17];RW XCE16[16];
+        RW XCE15[15];RW XCE14[14];RW XCE13[13];RW XCE12[12];
+        RW XCE11[11];RW XCE10[10];RW XCE9[9];RW XCE8[8];
+        RW XCE7[7];RW XCE6[6];RW XCE5[5];RW XCE4[4];
+        RW XCE3[3];RW XCE2[2];RW XCE1[1];RW XCE0[0];
+    };
+  
+    register dataReceiveReg(0x00) alias RBR {
+        RW DR[31:0];
+    };
+    
+    register dataTransmitReg(0x04) alias DXR {
+        RW DX[31:0];
+    };
+
+    register serialPortControlReg(0x08) alias SPCR {
+        READ reserved[31:26];
+        RW FREE[25];
+        RW SOFT[24];
+        RW FRST[23];
+        RW GRST[22];
+        RW XINTM[21:20];
+        RW XSYNCERR[19];
+        READ XEMPTY[18];
+        READ XRDY[17];
+        RW XRST[16];
+        RW DLB[15];
+        RW RJUST[14:13];
+        RW CLKSTP[12:11];
+        READ reserved[10:8];
+        RW DXENA[7];
+        READ reserved[6];
+        RW RINTM[5:4];
+        RW RSYNCERR[3];
+        READ RFULL[2];
+        READ RRDY[1];
+        RW RRST[0];
+    };
+
+    register receiveControlReg(0x0c) alias RCR {
+        RW RPHASE[31];
+        RW RFRLEN2[30:24];
+        RW RWRLEN2[23:21];
+        RW RCOMPAND[20:19];
+        RW RFIG[18];
+        RW RDATDLY[17:16];
+        READ reserved[15];
+        RW RFRLEN1[14:8];
+        RW RWRLEN1[7:5];
+        RW RWDREVRS[4];
+        READ reserved[3:0];
+    };
+    
+    register transmitControlReg(0x10) alias XCR {
+        RW RPHASE[31];
+        RW XFRLEN2[30:24];
+        RW XWRLEN2[23:21];
+        RW XCOMPAND[20:19];
+        RW XFIG[18];
+        RW XDATDLY[17:16];
+        READ reserved[15];
+        RW XFRLEN1[14:8];
+        RW XWRLEN1[7:5];
+        RW XWDREVRS[4];
+        READ reserved[3:0];
+    };
+    
+    register sampleRateGeneratorReg(0x14) alias SRGR {
+        RW GSYNC[31];
+        RW CLKSP[30];
+        RW CLKSM[29];
+        RW FSGM[28];
+        RW FPER[27:16];
+        RW FWID[15:8];
+        //RW CLKGDV[7:0]; //Original
+        CLKGDV {
+           RW A[7:6];
+           RW B[5:2];
+           RW C[1:0];
+        };
+    };
+    
+    register multichannelControlReg(0x18) alias MCR {
+        READ reserved[31:26];
+        RW XMCME[25];
+        RW XPBBLK[24:23];
+        RW XPABLK[22:21];
+        READ XCBLK[20:18];
+        RW XMCM[17:16];
+        READ reserved[15:10];
+        RW RMCME[9];
+        RW RPBBLK[8:7];
+        RW RPABLK[6:5];
+        READ RCBLK[4:2];
+        READ reserved[1];
+        RW RMCM[0];
+    };
+    
+    register pinControlReg(0x24) alias PCR {
+        READ reserved[31:14];
+        RW reserved[13:12];
+        RW FSXM[11]; //0 - External source; 1 - Defined by FSGM e SRGR;
+        RW FSRM[10]; //0 - External source | FSR pin is input; 1 - Internal Source | FSR pin is output;
+        RW CLKXM[9];
+        RW CLKRM[8];
+        RW SCLKME[7];
+        READ reserved[6];
+        RW reserved[5];
+        READ reserved[4];
+        RW FSXP[3];
+        RW FSRP[2];
+        RW CLKXP[1];
+        RW CLKRP[0];
+    };
+    
+    register enhancedReceivedChannelEnable0Reg(0x1C) alias RCERE0 = enhancedReceivedChannelEnableFmt;
+    register enhancedReceivedChannelEnable1Reg(0x28) alias RCERE1 = enhancedReceivedChannelEnableFmt;
+    register enhancedReceivedChannelEnable2Reg(0x30) alias RCERE2 = enhancedReceivedChannelEnableFmt;
+    register enhancedReceivedChannelEnable3Reg(0x38) alias RCERE3 = enhancedReceivedChannelEnableFmt;
+    
+    register enhancedTransmitChannelEnable0Reg(0x20) alias XCERE0 = enhancedTransmitChannelEnableFmt;
+    register enhancedTransmitChannelEnable1Reg(0x2C) alias XCERE1 = enhancedTransmitChannelEnableFmt;
+    register enhancedTransmitChannelEnable2Reg(0x34) alias XCERE2 = enhancedTransmitChannelEnableFmt;
+    register enhancedTransmitChannelEnable3Reg(0x3C) alias XCERE3 = enhancedTransmitChannelEnableFmt;
+        
+    behaviors {
+        r_timeRestriction.setactions {
+            SRGR.CLKGDV.A = b01;
+            PCR.FSXP = b01001010;
+            PCR.FSXP = 122;
+            //mindelay(20,NS);
+        }
+        
+        r_BaudRestriction.setactions {
+            //maxdelay(200,MS);
+            PCR.FSXP = 122;
+            SRGR.CLKGDV.A = b01;
+            //mindelay(20,NS);
+        }
+        r_BaudRestriction2.setactions {
+            //maxdelay(200,MS);
+            RCR = 65;
+            SPCR.DLB = 22;
+            maxdelay(200,MS);
+            RCR = 68;
+        }
+        r_BaudRestriction3.setactions {
+            //maxdelay(200,MS);
+            SPCR.DLB = 22;
+            SRGR.CLKGDV.B = b0101101;
+            //mindelay(20,NS);
+        }
+    };
+    
+    bindings {
+        //...
+        r_timeRestriction requires r_BaudRestriction before;
+        s_mcbspReceiveInit always_requires s_mcbspInit;
+        s_mcbspTransmitInit always_requires s_mcbspInit;        
+        s_mcbspTransmitInit requires_or s_mcbspReceiveInit, s_mcbspInit after;
+        r_timeRestriction always_requires r_BaudRestriction;
+
+        //Adding Constraints to the Services
+        s_mcbspReceiveInit.addconstraints(r_timeRestriction,e_timeBoundery);
+        s_mcbspTransmitInit.addconstraints(r_BaudRestriction2,e_timeBoundery);
+        s_mcbspInit.addconstraints(r_timeRestriction,r_BaudRestriction2,r_BaudRestriction3,e_timeBoundery);
+        s_mcbspSampleRateGenReset.addconstraints(r_timeRestriction,e_timeBoundery);
+        s_mcbspReceiveReset.addconstraints(r_BaudRestriction,e_timeBoundery);
+        s_mcbspTransmitReset.addconstraints(r_timeRestriction,e_timeBoundery);
+    };
+}

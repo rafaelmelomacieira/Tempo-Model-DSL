@@ -1,0 +1,8 @@
+digraph rxdata{
+node [shape = "record" 
+ style="filled" ];
+node0 [ label = "[0:7] rxdata[RO]"
+ fillcolor = "yellow"];
+node1 [ label = "[8:15] RESERVED[--]"
+ fillcolor = "red"];
+}

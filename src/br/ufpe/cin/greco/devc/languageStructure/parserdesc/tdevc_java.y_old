@@ -1,0 +1,342 @@
+package languageStructure.devc;
+import java.text.DecimalFormat;
+import java_cup.runtime.*;
+import languageStructure.*;
+import languageStructure.type.*;
+
+parser code {:
+	
+	public static Lex myLex;
+	
+	static Integer baseAddress;
+	static String  absoluteDir;
+	static double  initialTime;
+	//static String  projName;
+	
+	public static void main(String args[]) throws Exception {
+		initialTime = System.currentTimeMillis();
+		SymbolFactory sf = new DefaultSymbolFactory();
+		//projName = args[1];
+		baseAddress = Integer.parseInt(args[1]);
+		absoluteDir = args[2];
+		if (args.length==0){
+			myLex = new Lex(System.in,sf);
+			new parser(myLex,sf).parse();
+		}else{
+			myLex = new Lex(new java.io.FileInputStream(args[0]),sf);
+			new parser(myLex,sf).parse();
+		}
+	}
+	//public static void addParam
+:}
+
+terminal T_OPEN_PAR, T_CLOSE_PAR, T_PONTVIRG, T_DOISPONTOS,T_DEVC,T_OPEN_CHAVE, T_CLOSE_CHAVE, T_IGUAL,
+T_ASPAS, T_ASPA,T_PERCENT, T_PERCENT_RESERVED, T_PERCENT_MASK, T_S, T_R, T_DOT, T_OPEN_COLCHETE, T_CLOSE_COLCHETE;
+ terminal String T_MASKREP;
+ terminal T_DC_SCML_PORT, T_DC_TLM_PORT, T_DC_CLK_PORT, T_DC_FORMAT, T_DC_SERVICE,T_MAIOR, T_MENOR, T_VIRG, T_READ, T_WRITE, T_READWRITE,
+T_DC_REG, T_DC_BUFFER, T_DC_DRV_MAP, T_DC_OS,T_DC_OS_MAP, T_OPEN, T_INIT, T_RELEASE, T_CLOSE, T_IOCTL,
+T_SEEK, T_DEV_CTOR, T_SET_ADDRESS, T_BINDTO, T_SET_ACTION, T_PRE, T_POS, T_WAIT_STATE, T_INTERRUPT,
+T_POLLING, T_VOID, T_AST;
+terminal String T_IDENT, T_OPER, T_LOGIC_OPER;
+/*terminal T_LETTER, T_DIGIT;*/
+terminal String T_INT;
+terminal T_PLUS, T_UCLINUX;
+
+non terminal input;
+non terminal TDCCheckerGenerator devc_obj_def;
+non terminal port_definition;
+non terminal FormatEntity format_definition;
+non terminal String fmt_decl,params_fmt,param_fmt,ret_fmt,reg_fmt,bits;
+non terminal Service serv_definition;
+non terminal Register sto_definition, reg_decl;
+non terminal AccessType rw, rw_ex;
+non terminal buffer_decl;
+non terminal VarMap varmap_definition, varmap_decl;
+non terminal Variable var, varfield;
+non terminal os_definiton,os_type,osmap_definition,osimap_decl,posix_intf;
+non terminal MethodDefinition method_definition, ctor_definition;
+non terminal AddressBind address_def;
+non terminal ServiceBind bind_def;
+non terminal Action action_def;
+non terminal ActionType attrib;
+non terminal Statement expr;
+non terminal Statement l_expr;
+non terminal Assignment assign;
+non terminal RandomBlock random_assign;
+non terminal Condition expr_cond;
+non terminal ConditionBlock expr_cond_block;
+non terminal Condition cond;
+non terminal Statement sinc_decl,wait_decl,intr_decl,poll_decl;
+
+   /*%union {
+     int       t_int;  /* For the lexical analyser. NUMBER tokens 
+     char      ident;  /* For the lexical analyser. IDENT tokens 
+   }*/
+/*%type <t_int>   T_INT
+%type <ident> T_IDENT
+%type <t_int> address_def*/
+
+/*%start nt_devc_spec*/
+
+input ::= T_DEVC T_OPEN_PAR T_IDENT:pjName T_CLOSE_PAR T_OPEN_CHAVE devc_obj_def:def1 T_CLOSE_CHAVE
+{:
+	def1.runCheckerGeneration(parser.initialTime, pjName, parser.baseAddress, parser.absoluteDir);
+:};
+
+devc_obj_def ::= port_definition T_PONTVIRG devc_obj_def:def_aut {: RESULT = def_aut; :}
+| format_definition:fmt T_PONTVIRG devc_obj_def:def_aut {:
+	def_aut.addFormat(fmt);
+	RESULT = def_aut;
+:}
+| serv_definition:serv T_PONTVIRG devc_obj_def:def_aut {:
+	def_aut.addService(serv);
+	RESULT = def_aut;
+:}
+| sto_definition:sto T_PONTVIRG devc_obj_def:def_aut {:
+	def_aut.addRegister(sto);
+	RESULT = def_aut;
+:}
+| varmap_definition:vardef devc_obj_def:def_aut {:
+	def_aut.addVarMap(vardef);
+	RESULT = def_aut;
+:}
+| os_definiton T_PONTVIRG devc_obj_def:def_aut {: RESULT = def_aut; :}
+| osmap_definition devc_obj_def:def_aut {: RESULT = def_aut; :}
+| ctor_definition:ctor1 {:
+	TDCCheckerGenerator tdccgen = new TDCCheckerGenerator(ctor1); 
+	RESULT = tdccgen;
+:};
+
+port_definition ::= T_DC_SCML_PORT T_IDENT /*{printf("-TESTE %s|%d-\n", current[pos-1-0],pos);pos=0;}*/
+| T_DC_TLM_PORT T_IDENT
+| T_DC_CLK_PORT T_IDENT;
+
+format_definition ::= T_DC_FORMAT T_IDENT:namei T_IGUAL fmt_decl:fmt {: RESULT = new FormatEntity(namei,fmt); :};
+
+fmt_decl ::= params_fmt:params {: RESULT = params; :}
+| ret_fmt:ret {: RESULT = ret; :};
+
+params_fmt ::= T_ASPAS param_fmt:param T_ASPAS {: RESULT = param; :};
+
+param_fmt ::= param_fmt:param T_PERCENT T_IDENT:ident T_DOISPONTOS T_INT:inte T_DOISPONTOS T_S {: RESULT = param + "%" + ident + ":" + inte + ":s"; :}
+| param_fmt:param T_PERCENT T_IDENT:ident T_DOISPONTOS T_INT:inte {: RESULT =  param + "%" + ident + ":" + inte; :}
+| param_fmt:param T_PERCENT_RESERVED T_DOISPONTOS T_INT:inte {: RESULT = param + "%RESERVED:" + inte; :}
+| param_fmt:param reg_fmt:reg {: RESULT = param + reg; :}
+| T_PERCENT T_IDENT:ident T_DOISPONTOS T_INT:inte T_DOISPONTOS T_S {: RESULT = "%" + ident + ":" + inte + ":s"; :}
+| T_PERCENT T_IDENT:ident T_DOISPONTOS T_INT:inte {: RESULT = "%" + ident + ":" + inte; :}
+| T_PERCENT_RESERVED T_DOISPONTOS T_INT:inte {: RESULT = "%RESERVED:" + inte; :}
+| reg_fmt:reg {: RESULT = reg; :};
+
+ret_fmt ::= T_ASPAS T_PERCENT T_DOISPONTOS T_R T_DOISPONTOS T_INT:siz T_ASPAS {: RESULT = "%:r:" + siz; :}
+| T_ASPAS T_PERCENT T_DOISPONTOS T_R T_DOISPONTOS T_INT:siz T_DOISPONTOS T_S T_ASPAS {: RESULT = "%:r:" + siz + ":s"; :};
+
+reg_fmt ::= T_PERCENT T_IDENT:ident T_DOISPONTOS T_INT:inte T_PERCENT_MASK T_DOISPONTOS T_ASPA bits:mascara T_ASPA {: RESULT = "%" + ident + ":" + inte + "%MASK:" + mascara; :};
+
+bits ::= T_MASKREP:masc bits:masc_c {: RESULT = masc + masc_c; :}
+| T_DOT bits:masc_c {: RESULT = "." + masc_c; :}
+| T_MASKREP:masc {: RESULT = masc; :}
+| T_DOT {: RESULT = "."; :};
+
+serv_definition ::=  T_DC_SERVICE T_MENOR T_VOID T_MAIOR T_IDENT:ident {: RESULT = new Service(ident); :}
+| T_DC_SERVICE T_MENOR T_IDENT:fident T_VIRG rw_ex:rwx T_MAIOR T_IDENT:ident {:
+		RESULT = new Service(ident, rwx, new ServiceFormat(fident));
+	:};
+
+sto_definition ::= reg_decl:reg {: RESULT = reg; :}
+| buffer_decl {: RESULT = null; :}; 
+
+
+reg_decl ::= T_DC_REG T_MENOR T_IDENT:fmt T_MAIOR T_IDENT:ident {:
+	RESULT = new Register(ident,new RegisterFormat(fmt),AccessType.READ_WRITE); 
+:}
+| T_DC_REG T_MENOR T_IDENT:fmt T_VIRG rw:rwx T_MAIOR T_IDENT:ident {:
+	RESULT = new Register(ident,new RegisterFormat(fmt),rwx);
+:};
+
+
+rw_ex ::= T_READ {:RESULT = AccessType.READ; :}
+| T_WRITE {:RESULT = AccessType.WRITE; :};
+
+rw ::= rw_ex
+| T_READWRITE {:RESULT = AccessType.READ_WRITE; :};
+
+buffer_decl ::= T_DC_BUFFER T_IDENT T_DOISPONTOS T_INT T_DOISPONTOS T_INT;
+
+varmap_definition ::= T_DC_DRV_MAP T_IDENT:namei T_OPEN_CHAVE varmap_decl:varmap T_CLOSE_CHAVE
+{: varmap.setName(namei); RESULT = varmap; :};
+
+varmap_decl ::= var:var1 T_PONTVIRG {:
+	VarMap varmap = new VarMap();
+ 	varmap.addVariable(var1);
+	RESULT = varmap;
+:}
+| var:var1 T_PONTVIRG varmap_decl:varmap {:
+	varmap.addVariable(var1);
+	RESULT = varmap;
+:};
+
+var ::= T_IDENT:namei T_IGUAL varfield:var1 {: var1.setName(namei); RESULT = var1; :};
+
+varfield ::= T_IDENT:ident {:
+	Variable var = new Variable();
+	var.addField(new VariableField(ident));
+	RESULT = var;
+:}
+| T_IDENT:ident1 T_DOT T_IDENT:ident2 {:
+	Variable var = new Variable();
+	var.addField(new VariableField(ident1,ident2));
+	RESULT = var;
+:}
+| T_IDENT:ident T_PLUS varfield:var1 {:
+	var1.addField(new VariableField(ident));
+	RESULT = var1; 
+:}
+| T_IDENT:ident1 T_DOT T_IDENT:ident2 T_PLUS varfield:var1 {:
+	var1.addField(new VariableField(ident1,ident2));
+	RESULT = var1; 
+:};
+
+os_definiton ::= T_DC_OS T_MENOR os_type T_MAIOR T_IDENT;
+
+os_type ::= T_UCLINUX;
+
+osmap_definition ::= T_DC_OS_MAP T_IDENT T_OPEN_CHAVE osimap_decl T_CLOSE_CHAVE;
+
+osimap_decl ::= T_IDENT T_DOT posix_intf T_IGUAL T_IDENT T_PONTVIRG osimap_decl
+| T_IDENT T_DOT posix_intf T_IGUAL T_IDENT T_PONTVIRG;
+
+posix_intf ::= T_OPEN
+| T_INIT
+| T_WRITE
+| T_READ
+| T_RELEASE
+| T_CLOSE
+| T_IOCTL
+| T_SEEK;
+
+ctor_definition ::= T_DEV_CTOR T_OPEN_PAR T_IDENT T_CLOSE_PAR T_OPEN_CHAVE method_definition:md1 T_CLOSE_CHAVE
+{:
+	RESULT = md1;	
+:};
+
+method_definition ::= address_def:addr T_PONTVIRG method_definition:met {:
+	met.addAddressBind(addr);
+	RESULT = met;
+:}
+| action_def:ad1 method_definition:met
+{:
+   met.addAction(ad1);
+   RESULT = met;
+ :}
+| bind_def:bd T_PONTVIRG method_definition:met {:
+	met.addServiceBind(bd);
+	RESULT = met;
+:}
+| address_def:addr T_PONTVIRG {:
+	MethodDefinition metDef = new MethodDefinition();
+	metDef.addAddressBind(addr);
+	RESULT = metDef;
+:}
+| action_def:ad1 {:
+	MethodDefinition metDef = new MethodDefinition();
+	metDef.addAction(ad1);
+	RESULT = metDef;
+:}
+| bind_def:bd T_PONTVIRG {:
+		MethodDefinition met = new MethodDefinition();
+	 	met.addServiceBind(bd);
+		RESULT = met;
+	 :};
+
+address_def ::= T_IDENT:namei T_DOT T_SET_ADDRESS T_OPEN_PAR T_INT:addrs T_CLOSE_PAR {:
+	RESULT = new AddressBind(namei,addrs);
+:};
+
+bind_def ::= T_IDENT:id T_DOT T_BINDTO T_OPEN_PAR T_IDENT:var T_CLOSE_PAR {: RESULT = new ServiceBind(id,var,false); :}
+| T_IDENT:id T_DOT T_BINDTO T_OPEN_PAR T_IDENT:var1 T_DOT T_IDENT:var2 T_CLOSE_PAR {: RESULT = new ServiceBind(id,var1.concat(".").concat(var2),true); :}
+|T_IDENT:id T_DOT T_BINDTO T_OPEN_PAR T_IDENT:var1 T_DOT T_IDENT:var2 T_DOT T_IDENT:var3 T_CLOSE_PAR {: RESULT = new ServiceBind(id,var1.concat(".").concat(var2).concat(".").concat(var3),true); :};
+
+action_def ::= T_IDENT:i1 T_DOT T_SET_ACTION T_OPEN_PAR attrib:a1 T_CLOSE_PAR T_OPEN_CHAVE expr:l1 T_CLOSE_CHAVE
+{:
+RESULT = Action.getNewAction(i1,a1,l1);
+:}
+| T_IDENT:i1 T_DOT T_SET_ACTION T_OPEN_PAR T_CLOSE_PAR T_OPEN_CHAVE expr:l1 T_CLOSE_CHAVE
+{:
+RESULT = Action.getNewAction(i1,ActionType.FULL,l1);
+:};
+
+attrib ::= T_PRE {:RESULT = ActionType.PRE;:}
+| T_POS {:RESULT = ActionType.POS;:};
+
+expr ::= l_expr:c1 {: RESULT = c1; :}
+| assign:a1 T_PONTVIRG {: RESULT = a1; :}
+| T_OPEN_COLCHETE random_assign:ra T_CLOSE_COLCHETE {: RESULT = ra; :}
+| sinc_decl:sd T_PONTVIRG {:RESULT = sd;:}
+| l_expr:c1 expr:e1 {:c1.setNextStatement(e1);RESULT=c1;:}
+| assign:a1 T_PONTVIRG expr:e1 {:a1.setNextStatement(e1);RESULT=a1;:}
+| T_OPEN_COLCHETE random_assign:ra T_CLOSE_COLCHETE expr:e1 {:ra.setNextStatement(e1);RESULT=ra;:}
+| sinc_decl:sd T_PONTVIRG expr:e1 {:sd.setNextStatement(e1);RESULT=sd;:};
+
+random_assign ::= assign:as T_PONTVIRG {:
+	RandomBlock rb = new RandomBlock();
+	rb.addStatement(as);
+	RESULT = rb;
+:}
+| T_AST assign:as T_PONTVIRG {:
+	RandomBlock rb = new RandomBlock();
+	rb.addEndStatement(as);
+	RESULT = rb;
+:}
+| random_assign:rassi assign:assi T_PONTVIRG {:
+	rassi.addStatement(assi);
+	RESULT = rassi;
+:}
+| random_assign:rassi T_AST assign:assi T_PONTVIRG {:
+	rassi.addEndStatement(assi);
+	RESULT = rassi;
+:};
+
+l_expr ::= expr_cond:c1 T_OPEN_CHAVE expr:e1 T_CLOSE_CHAVE {: RESULT = new Fork(c1,e1);:};
+
+expr_cond ::=   cond:co T_LOGIC_OPER:lo expr_cond:exco {:
+	co.setNextCondition(exco,lo);
+	RESULT = co;
+:}  
+| cond:co {: RESULT = co; :}
+| expr_cond_block:ecb T_LOGIC_OPER:lo expr_cond:exco {:
+	ecb.setNextCondition(exco,lo);
+	RESULT = ecb;
+:}
+| expr_cond_block:ecb {: RESULT = ecb;:};
+	
+expr_cond_block ::= T_OPEN_PAR expr_cond:ec T_CLOSE_PAR {: RESULT = new ConditionBlock((Condition) ec); :};
+
+assign ::= T_IDENT:i1 T_IGUAL T_INT:int1 {: RESULT = new Assignment(i1,int1); :}
+| T_IDENT:i1 T_DOT T_IDENT:i2 T_IGUAL T_INT:int1 {: RESULT = new Assignment(i1.concat(".").concat(i2),int1); :}
+| T_IDENT:i1 T_DOT T_IDENT:i2 T_DOT T_IDENT:i3 T_IGUAL T_INT:int1
+{:
+RESULT = new Assignment(i1.concat(".").concat(i2).concat(".").concat(i3),int1);
+:};
+
+sinc_decl ::= wait_decl:s {: RESULT = s; :}
+| intr_decl:s {: RESULT = s; :}
+| poll_decl:s {: RESULT = s; :};
+
+wait_decl ::= T_WAIT_STATE T_OPEN_PAR cond:c T_CLOSE_PAR {: RESULT = new WaitState((Condition) c);:};
+
+intr_decl ::= T_INTERRUPT T_OPEN_PAR cond:c T_CLOSE_PAR {: RESULT = new Interrupt((Condition) c);:};
+
+poll_decl ::= T_POLLING T_OPEN_PAR cond:c T_CLOSE_PAR {: RESULT = new Polling((Condition) c);:};
+
+cond ::= T_IDENT:i1 T_OPER:o1 T_INT:in1 {: RESULT = new Condition(i1,o1,in1); :}
+| T_IDENT:i1 T_DOT T_IDENT:i2 T_OPER:o1 T_INT:in1 {:RESULT = new Condition(i1.concat(".").concat(i2),o1,in1);:}
+| T_IDENT:i1 T_DOT T_IDENT:i2 T_DOT T_IDENT:i3 T_OPER:o1 T_INT:in1 {:RESULT = new Condition(i1.concat(".").concat(i2).concat(".").concat(i3),o1,in1);:}
+| T_IDENT:i1 T_MAIOR T_INT:in1  {:RESULT = new Condition(i1,">",in1);:}
+| T_IDENT:i1 T_DOT T_IDENT:i2 T_MAIOR T_INT:in1 {:RESULT = new Condition(i1.concat(".").concat(i2),">",in1);:}
+| T_IDENT:i1 T_DOT T_IDENT:i2 T_DOT T_IDENT:i3 T_MAIOR T_INT:in1 {:RESULT = new Condition(i1.concat(".").concat(i2).concat(".").concat(i3),">",in1);:}
+| T_IDENT:i1 T_MENOR T_INT:in1  {:RESULT = new Condition(i1,"<",in1);:}
+| T_IDENT:i1 T_DOT T_IDENT:i2 T_MENOR T_INT:in1 {:RESULT = new Condition(i1.concat(".").concat(i2),"<",in1);:}
+| T_IDENT:i1 T_DOT T_IDENT:i2 T_DOT T_IDENT:i3 T_MENOR T_INT:in1 {:RESULT = new Condition(i1.concat(".").concat(i2).concat(".").concat(i3),"<",in1);:}
+| /*empty*/;
+
+/*cnoum : article noum {printf("cnoum2 %s %s",$1,$2);} | noum {$$ = "cnoum1";};*/

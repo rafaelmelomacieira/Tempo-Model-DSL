@@ -1,0 +1,18 @@
+digraph NCR{
+node [shape = "record" 
+ style="filled" ];
+node0 [ label = "[0] RST[RW]"
+ fillcolor = "green"];
+node1 [ label = "[1:2] LBK[RW]"
+ fillcolor = "green"];
+node2 [ label = "[3] FDX[RO]"
+ fillcolor = "yellow"];
+node3 [ label = "[4] FCOL[RW]"
+ fillcolor = "green"];
+node4 [ label = "[5] RESERVED[--]"
+ fillcolor = "red"];
+node5 [ label = "[6] WAKEEN[RW]"
+ fillcolor = "green"];
+node6 [ label = "[7] RESERVED[--]"
+ fillcolor = "red"];
+}

@@ -1,0 +1,98 @@
+device (alterauart) {
+
+external register RXReg (0x00) alias rxdata {
+	reserved [15:8];
+	READ rxdata [7:0];
+}
+
+external register TXReg (0x04) alias txdata {
+	reserved [15:8];
+	WRITE txdata [7:0];
+}
+
+external register StatusReg (0x08) alias status {
+	reserved [15:13];
+	READ EOP [12];
+	RW CTS [11];
+	RW DCTS [10];
+	reserved [9];
+	RW E [8];
+	READ RRDY [7];
+	READ TRDY [6];
+	READ TMT [5];
+	RW TOE [4];
+	RW ROE [3];
+	RW BRK [2];
+	RW FE [1];
+	RW PE [0];
+}
+
+external register ControlReg (0x0c) alias control {
+	reserved [15:13];
+	READ IEOP [12];
+	RW RTS [11];
+	RW IDCTS [10];
+	READ TRBK [9];
+	RW IE [8];
+	READ IRRDY [7];
+	READ ITRDY [6];
+	READ ITMT [5];
+	RW ITOE [4];
+	RW IROE [3];
+	RW IBRK [2];
+	RW IFE [1];
+	RW IPE [0];
+}
+
+external register DivisorReg (0x10) alias divisor {
+    RW divisor [15:8];
+    RW sdivisor [7:0];
+}
+
+	globalstate {
+		orthoregion rx {
+			initialstate RX_IDLE {
+				addexitpoint(RX_PRONTO) {
+					read(status.RRDY) == 1
+				}	
+			}
+	
+			state RX_PRONTO {
+				addexitpoint(RX_IDLE) {
+					read(rxdata)
+				}
+			}
+		}
+	
+		orthoregion tx {
+			initialstate TX_IDLE {
+				addexitpoint(TX_PRONTO) {
+					read(status.TRDY) == 1
+				}
+			}
+	
+			state TX_PRONTO {
+				addexitpoint(TX_IDLE) {
+					write(txdata)
+				}
+			}
+		}
+		addproperty(critical) a {
+			ltlf (
+			  [](!( write(txdata) && TX_IDLE))
+			)
+		}
+	
+		addproperty(critical) b {
+			ltlf (
+			  [](!(read(rxdata) && RX_IDLE))
+			 )
+		}
+	
+		addproperty(critical) c {
+			ltlf (
+			  [](read(rxdata) -> (status.PE == 0 && status.FE == 0))
+			)
+		}
+	}
+}

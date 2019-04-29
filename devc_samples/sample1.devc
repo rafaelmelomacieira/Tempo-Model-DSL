@@ -1,0 +1,64 @@
+import aaaa;
+import bbbb;
+import cccc;
+
+DEVC(newsyntax){
+    @dc_service <VOID> lcdpcf8833_init;   
+    dc_service <VOID> lcdpcf8833_reset;
+    dc_service <VOID> lcdpcf8833_nop;
+    dc_service <VOID> lcdpcf8833_setcon pos {lcdpcf8833_ramwr} pre {lcdpcf8833_nop};
+    dc_service <VOID> lcdpcf8833_setrgb pos {lcdpcf8833_ramwr max_delay(20,MS)};
+    dc_service <VOID> lcdpcf8833_ramwr;
+    dc_format reg_fmt = "%cmd:1%data:8";
+    dc_format reg_fmt2 = "%cmd:4%data:4";
+    dc_reg <reg_fmt,RW> main_reg;
+    dc_reg <reg_fmt2,RW> reg2;
+    dc_drv_map reg_map {
+        payload = main_reg;
+        extra = reg2;
+    }
+
+    behavior{
+       lcdpcf8833_init.set_actions(){
+            must{
+                reg_map.payload = 8;                
+                reg_map.payload = 18;
+                reg_map.payload = 14;
+            }
+            main{
+                 reg_map.payload = 1;
+                 reg_map.payload = 2;
+                 reg_map.payload = 9;
+                 reg_map.payload = 10;
+             }
+        }
+        
+        lcdpcf8833_reset.set_actions(){
+            might{
+                reg_map.payload = 21;
+           }
+           main{
+                reg_map.payload = 21;
+           }
+        }
+        
+        lcdpcf8833_setcon.set_actions(){
+            reg_map.payload = 31;
+        }
+        
+        lcdpcf8833_ramwr.set_actions(){
+            reg_map.payload = 41;
+        }
+        
+        lcdpcf8833_nop.set_actions(){
+            reg_map.payload = 51;
+        }
+        
+        lcdpcf8833_setrgb.set_actions(){
+            reg_map.payload = 61;
+        }
+        
+        main_reg.set_address(0);
+        reg2.set_address(4);
+    }
+}

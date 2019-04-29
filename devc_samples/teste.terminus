@@ -1,0 +1,41 @@
+import ethernet_class;
+
+device (dm9000a) {
+    
+format txStatusfmt {
+        READ TJTO[7];
+        READ LOSSC[6];
+        READ NC[5];
+        READ LATEC[4];
+        READ COL[3];
+        READ EC[2];
+        READ reserved[0:1];
+    }
+    
+ internal IntRegsProt register txControlReg(0x02) alias TCR {
+        READ reserved[7];
+        RW TJDIS[6];
+        RW EXCECM[5];
+        RW PAD_DIS2[4];
+        RW CRC_DIS2 [3];
+        RW PAD_DIS1 [2];
+        RW CRC_DIS1 [1];
+        RW TXREQ [0];
+  }
+
+    
+  external register EEPROM_PHYDataReg(0x0D) alias EPDR {
+        RW EE_PHY_H[7:0];
+        RW EE_PHY_L[7:0];
+  }
+     
+  internal IntRegsProt register txStatusRegI(0x03) alias TSRI = txStatusfmt;
+
+globalstate {
+    initialstate IDLE {
+	    addexitpoint(PHYUP) {
+	        ltlf("[] A=A")
+	    }
+	}
+  }
+}

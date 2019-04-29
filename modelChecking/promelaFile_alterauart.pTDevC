@@ -1,0 +1,47 @@
+34
+reg%rxdata ................
+cmp%rxdata%rxdata
+reg%control ................
+cmp%control%TRBK
+cmp%control%ITOE
+cmp%control%IDCTS
+cmp%control%IFE
+cmp%control%IBRK
+cmp%control%ITMT
+cmp%control%ITRDY
+cmp%control%RTS
+cmp%control%IRRDY
+cmp%control%IE
+cmp%control%IROE
+cmp%control%IPE
+cmp%control%IEOP
+reg%txdata ................
+cmp%txdata%txdata
+reg%divisor ................
+cmp%divisor%divisor
+cmp%divisor%sdivisor
+reg%status ................
+cmp%status%DCTS
+cmp%status%CTS
+cmp%status%E
+cmp%status%EOP
+cmp%status%ROE
+cmp%status%TOE
+cmp%status%RRDY
+cmp%status%TRDY
+cmp%status%PE
+cmp%status%BRK
+cmp%status%TMT
+cmp%status%FE
+6
+WRITE%reg%txdata
+est%TX_IDLE
+READ%reg%rxdata
+est%RX_IDLE
+cmp%status%PE == 0
+cmp%status%FE == 0
+Global_State%a%[](!(q0 && q1))%Global_State%b%[](!(q2 && q3))%Global_State%c%[](q2 -> (q4 && q5))
+.RX_PRONTO
+.RX_IDLE
+.TX_IDLE
+.TX_PRONTO

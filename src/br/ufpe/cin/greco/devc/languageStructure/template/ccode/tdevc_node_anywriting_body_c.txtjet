@@ -1,0 +1,19 @@
+<%@jet package="br.ufpe.cin.greco.devc.languageStructure.tdevctemplate.ccode" imports="br.ufpe.cin.greco.devc.languageStructure.* br.ufpe.cin.greco.devc.languageStructure.automata.* java.util.*" class="TDEVCNodeAnyWritingBodyC" %>
+<%ArrayList params = (ArrayList) argument;
+Service service = (Service) params.get(0);
+Node node = (Node) params.get(1);
+Edge edge = null;//(Edge) node.getAnyWritingEdges().toArray()[0];
+AnyWriting anyWriting = (AnyWriting) edge.getTransitions().toArray()[0];%>
+case <%=node.getName()%>: //Node Type: <%=node.getType().getName()%>[<%=node.getNodeTransitionType().getName()%>]
+	currentAutomata->errorMsg = "<%=node.getName()%> to Rejected State: Expected: Writing at <%=anyWriting.getVar().getSource().toUpperCase()%>";
+	currentAutomata->errorValue = 0;
+	if (currentAutomata->access_type == 0) {
+		return <%=node.getName()%>;
+	} else {
+		if (currentAutomata->currentVarList->platformAddr == <%=anyWriting.getVar().getSource().toUpperCase()%>_ADDR) {
+			addCoverageCount(currentAutomata,<%=service.addFlowCoverageNode(edge.getFrom())%>);
+			return <%=edge.getTo().getName()%>;
+		}
+	}
+break;
+

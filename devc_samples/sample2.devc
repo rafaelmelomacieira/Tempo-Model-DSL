@@ -1,0 +1,54 @@
+import aaaa;
+import bbbb;
+import cccc;
+
+DEVC(newsyntax2){
+    dc_service <VOID> lcdpcf8833_init pos {lcdpcf8833_ramwr};   
+    dc_service <VOID> lcdpcf8833_reset;
+    dc_service <VOID> lcdpcf8833_nop;
+    dc_service <VOID> lcdpcf8833_ramwr;
+    dc_format reg_fmt = "%cmd:1%data:8";
+    dc_format reg_fmt2 = "%cmd:4%data:4";
+    dc_reg <reg_fmt,RW> main_reg;
+    dc_reg <reg_fmt2,RW> reg2;
+    dc_drv_map reg_map {
+        payload = main_reg;
+        extra = reg2;
+    }
+
+    behavior{
+       lcdpcf8833_init.set_actions(){
+            reg_map.payload = 21;
+            reg_map.payload = 10;
+        }
+        
+        lcdpcf8833_reset.set_actions(){
+            must{ 
+                reg_map.payload = 221;
+                reg_map.payload = 222;
+            }
+            main{
+                reg_map.payload = 21;
+                reg_map.payload = 22;
+
+            }
+        }
+        lcdpcf8833_nop.set_actions(){
+            must{ 
+                reg_map.payload = 221;
+                reg_map.payload = 322;
+            }
+            main{
+                reg_map.payload = 31;
+                reg_map.payload = 13;
+            }
+        }
+        lcdpcf8833_ramwr.set_actions(){
+            reg_map.payload = 41;
+            reg_map.payload = 14;
+        }
+        
+        main_reg.set_address(0);
+        reg2.set_address(4);
+    }
+}

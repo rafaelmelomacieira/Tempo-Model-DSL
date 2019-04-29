@@ -1,0 +1,14 @@
+digraph OCR{
+node [shape = "record" 
+ style="filled" ];
+node0 [ label = "[0:2] PHYOP[RW]"
+ fillcolor = "green"];
+node1 [ label = "[3] SCS[RW]"
+ fillcolor = "green"];
+node2 [ label = "[4] SOE[RW]"
+ fillcolor = "green"];
+node3 [ label = "[5] RESERVED[--]"
+ fillcolor = "red"];
+node4 [ label = "[6:7] SCC[RW]"
+ fillcolor = "green"];
+}

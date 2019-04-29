@@ -1,0 +1,5 @@
+digraph TX_IDLE{
+TX_IDLE[shape="Mdiamond"];
+TX_PRONTO -> TX_IDLE [label = "p5"];
+TX_IDLE -> TX_PRONTO [label = "p3 && p4"];
+}

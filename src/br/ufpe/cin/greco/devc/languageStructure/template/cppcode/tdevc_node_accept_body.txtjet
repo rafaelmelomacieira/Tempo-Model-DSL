@@ -1,0 +1,8 @@
+<%@jet package="br.ufpe.cin.greco.devc.languageStructure.tdevctemplate" imports="br.ufpe.cin.greco.devc.languageStructure.* br.ufpe.cin.greco.devc.languageStructure.automata.* java.util.*" class="TDEVCNodeAcceptBody" %>
+<%Node node = (Node) argument;%>
+		if (access_type == 0) {
+			return <%=node.getName()%>;
+		} else {
+			errorMsg = "<%=node.getType().getName()%> State to Rejected State!";
+			errorValue = 0;
+		}
