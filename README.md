@@ -1,1 +1,6 @@
-# tdevcgen
+# TDevCGEn
+
+| nome            | e-mail           |
+|-----------------|------------------|
+| Rafael Macieira | rmm2@cin.ufpe.br |
+| Edna Barros     | ensb@cin.ufpe.br |
