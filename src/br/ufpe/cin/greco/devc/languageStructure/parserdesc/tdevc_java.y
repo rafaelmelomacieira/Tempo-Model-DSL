@@ -155,8 +155,11 @@ parser code {:
 terminal T_OPEN_PAR, T_CLOSE_PAR, T_PONTVIRG, T_DOISPONTOS, T_OPEN_BRACE, T_CLOSE_BRACE, T_IGUAL,
 T_DOT, T_OPEN_BRACKET, T_CLOSE_BRACKET, T_VIRG;
 terminal String T_MASKREP;
+
 terminal T_READ, T_WRITE, T_READWRITE, T_DC_REG, T_RESERVED, T_MAX_DELAY, T_MIN_DELAY, T_IMPORT, T_DC_FORMAT,
-T_ALIAS, T_DEVICE, T_PATTERN, T_MASK;
+T_ALIAS, T_PATTERN, T_MASK;
+
+terminal T_SYSTEM, T_SUBSYSTEM, T_MODULE, T_COMPONENT, T_DEVICE 
 
 terminal DelayType T_SEC, T_MS, T_US, T_NS, T_PS; 
 
@@ -223,7 +226,7 @@ non terminal Delay delay_definition;
 non terminal DelayType delay_type;
 
 non terminal String tdevtimport;
-non terminal TDCCheckerGenerator tdevcspec;
+non terminal FileDescriptor tdevcspec; //TDCCheckerGenerator
 non terminal Pattern pattern_definition;
 non terminal OrthoRegion ortho_region_decl;
 non terminal HashMap<String, IDevCState> states_decl;
@@ -298,7 +301,36 @@ input ::= tdevtimport:imp tdevcspec:def1
 tdevtimport ::= tdevtimport:imp2 T_IMPORT T_IDENT:imp T_PONTVIRG {: RESULT = imp2 + "\n" + imp; :}
 | T_IMPORT T_IDENT:imp T_PONTVIRG {: RESULT = imp; :};
 
-tdevcspec ::= T_DEVICE T_OPEN_PAR T_IDENT:pjName T_CLOSE_PAR T_OPEN_BRACE devc_obj_def:def1 T_CLOSE_BRACE
+tdevcspec ::= T_SYSTEM T_OPEN_PAR T_IDENT:pjName T_CLOSE_PAR T_OPEN_BRACE devc_obj_def:def1 T_CLOSE_BRACE
+{:
+    def1.setProjectName(pjName);
+    FileDescriptor currentFile = new TerminusSystem(pjName,FileDescriptor.FileType.SYSTEM, def1);
+  	RESULT = currentFile;
+	////this.parser.setTDCCheckerGenerator(def1);
+	//def1.runCheckerGeneration(parser.initialTime, pjName, parser.baseAddress, parser.appName, parser.absoluteDir, parser.kernelImageDir, parser.codeType);
+:}
+| T_SUBSYSTEM T_OPEN_PAR T_IDENT:pjName T_CLOSE_PAR T_OPEN_BRACE devc_obj_def:def1 T_CLOSE_BRACE
+{:
+	def1.setProjectName(pjName);
+	RESULT = def1;
+	////this.parser.setTDCCheckerGenerator(def1);
+	//def1.runCheckerGeneration(parser.initialTime, pjName, parser.baseAddress, parser.appName, parser.absoluteDir, parser.kernelImageDir, parser.codeType);
+:}
+| T_MODULE T_OPEN_PAR T_IDENT:pjName T_CLOSE_PAR T_OPEN_BRACE devc_obj_def:def1 T_CLOSE_BRACE
+{:
+	def1.setProjectName(pjName);
+	RESULT = def1;
+	////this.parser.setTDCCheckerGenerator(def1);
+	//def1.runCheckerGeneration(parser.initialTime, pjName, parser.baseAddress, parser.appName, parser.absoluteDir, parser.kernelImageDir, parser.codeType);
+:}
+| T_COMPONENT T_OPEN_PAR T_IDENT:pjName T_CLOSE_PAR T_OPEN_BRACE devc_obj_def:def1 T_CLOSE_BRACE
+{:
+	def1.setProjectName(pjName);
+	RESULT = def1;
+	////this.parser.setTDCCheckerGenerator(def1);
+	//def1.runCheckerGeneration(parser.initialTime, pjName, parser.baseAddress, parser.appName, parser.absoluteDir, parser.kernelImageDir, parser.codeType);
+:}
+| T_DEVICE T_OPEN_PAR T_IDENT:pjName T_CLOSE_PAR T_OPEN_BRACE devc_obj_def:def1 T_CLOSE_BRACE
 {:
 	def1.setProjectName(pjName);
 	RESULT = def1;
