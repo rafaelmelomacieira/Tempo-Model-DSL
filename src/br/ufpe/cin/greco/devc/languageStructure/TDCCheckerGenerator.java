@@ -31,7 +31,7 @@ import freemarker.template.Configuration;
 import freemarker.template.TemplateExceptionHandler;
 
 
-public class TDCCheckerGenerator {
+public class TDCCheckerGenerator extends FileDescriptor {
 
 	private String projectName;
 	private Integer baseAddress;
