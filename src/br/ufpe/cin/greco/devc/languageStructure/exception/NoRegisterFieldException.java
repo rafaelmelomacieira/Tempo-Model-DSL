@@ -1,7 +1,7 @@
 package br.ufpe.cin.greco.devc.languageStructure.exception;
 
-import br.ufpe.cin.greco.devc.languageStructure.Register;
-import br.ufpe.cin.greco.devc.languageStructure.RegisterFormat;
+import br.ufpe.cin.greco.devc.languageStructure.filetype.tdevice.Register;
+import br.ufpe.cin.greco.devc.languageStructure.filetype.tdevice.RegisterFormat;
 
 public class NoRegisterFieldException extends Exception {
 	private RegisterFormat regForm;

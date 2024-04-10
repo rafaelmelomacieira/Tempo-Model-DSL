@@ -11,6 +11,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java_cup.runtime.*;
 import br.ufpe.cin.greco.devc.languageStructure.*;
+import br.ufpe.cin.greco.devc.languageStructure.filetype.tdevice.Field;
+import br.ufpe.cin.greco.devc.languageStructure.filetype.tdevice.Pattern;
+import br.ufpe.cin.greco.devc.languageStructure.filetype.tdevice.Register;
+import br.ufpe.cin.greco.devc.languageStructure.filetype.tdevice.RegisterFormat;
+import br.ufpe.cin.greco.devc.languageStructure.filetype.tdevice.Variable;
 import br.ufpe.cin.greco.devc.languageStructure.type.*;
 
 import br.ufpe.cin.greco.devc.languageStructure.ltl.*;

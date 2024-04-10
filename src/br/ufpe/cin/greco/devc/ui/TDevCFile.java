@@ -10,12 +10,12 @@ import java.io.IOException;
 import javax.swing.JFileChooser;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import br.ufpe.cin.greco.devc.languageStructure.Field;
-import br.ufpe.cin.greco.devc.languageStructure.Register;
-import br.ufpe.cin.greco.devc.languageStructure.RegisterFormat;
 import br.ufpe.cin.greco.devc.languageStructure.TDCCheckerGenerator;
 import br.ufpe.cin.greco.devc.languageStructure.devc.Lex;
 import br.ufpe.cin.greco.devc.languageStructure.devc.parser;
+import br.ufpe.cin.greco.devc.languageStructure.filetype.tdevice.Field;
+import br.ufpe.cin.greco.devc.languageStructure.filetype.tdevice.Register;
+import br.ufpe.cin.greco.devc.languageStructure.filetype.tdevice.RegisterFormat;
 import br.ufpe.cin.greco.devc.languageStructure.ltl.IDevCState;
 import java_cup.runtime.DefaultSymbolFactory;
 
