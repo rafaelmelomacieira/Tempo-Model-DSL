@@ -1,6 +1,6 @@
 package br.ufpe.cin.greco.devc.languageStructure.exception;
 
-import br.ufpe.cin.greco.devc.languageStructure.Bindable;
+import br.ufpe.cin.greco.devc.languageStructure.filetype.tdevice.Bindable;
 
 public class BindException extends Exception {
 	Bindable bind;

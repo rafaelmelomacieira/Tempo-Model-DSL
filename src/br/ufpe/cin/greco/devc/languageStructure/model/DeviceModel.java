@@ -3,7 +3,7 @@ package br.ufpe.cin.greco.devc.languageStructure.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import br.ufpe.cin.greco.devc.languageStructure.Register;
+import br.ufpe.cin.greco.devc.languageStructure.filetype.tdevice.Register;
 import br.ufpe.cin.greco.devc.languageStructure.ltl.IDevCState;
 import br.ufpe.cin.greco.devc.languageStructure.type.RegisterType;
 

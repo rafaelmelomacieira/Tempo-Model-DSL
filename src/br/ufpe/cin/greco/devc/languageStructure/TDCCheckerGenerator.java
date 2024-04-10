@@ -21,6 +21,13 @@ import br.ufpe.cin.greco.devc.languageStructure.ltl.*;
 import br.ufpe.cin.greco.devc.languageStructure.model.DeviceModel;
 
 import br.ufpe.cin.greco.devc.languageStructure.codeGen.SystemVerilogCodeGen;
+import br.ufpe.cin.greco.devc.languageStructure.filetype.tdevice.Field;
+import br.ufpe.cin.greco.devc.languageStructure.filetype.tdevice.FormatEntity;
+import br.ufpe.cin.greco.devc.languageStructure.filetype.tdevice.Pattern;
+import br.ufpe.cin.greco.devc.languageStructure.filetype.tdevice.Register;
+import br.ufpe.cin.greco.devc.languageStructure.filetype.tdevice.RegisterFormat;
+import br.ufpe.cin.greco.devc.languageStructure.filetype.tdevice.VarMap;
+import br.ufpe.cin.greco.devc.languageStructure.filetype.tdevice.Variable;
 import br.ufpe.cin.greco.devc.languageStructure.type.AccessType;
 import br.ufpe.cin.greco.devc.languageStructure.type.CodeLanguage;
 import br.ufpe.cin.greco.devc.languageStructure.type.FieldType;
@@ -31,7 +38,7 @@ import freemarker.template.Configuration;
 import freemarker.template.TemplateExceptionHandler;
 
 
-public class TDCCheckerGenerator extends FileDescriptor {
+public class TDCCheckerGenerator {
 
 	private String projectName;
 	private Integer baseAddress;
@@ -749,33 +756,7 @@ public class TDCCheckerGenerator extends FileDescriptor {
 		return regFormats;
 	}
 	
-	public void generateRegisters(){
-		int i = 0;
-		for (Register reg : registers.values()) {
-			reg.buildFields(this);
-			reg.checkIntegrity();
-		}
-		createRegistersDotFiles();
-		/*for (String serv : bindings.getPosServices().keySet()) {
-			System.out.println(serv + " [Pos]-> " + bindings.getPosServices().get(serv));
-		}
-		for (String serv : bindings.getPreServices().keySet()) {
-			System.out.println(serv + " [Pre]-> " + bindings.getPreServices().get(serv));
-		}
-		for (String serv : bindings.getPosRequirments().keySet()) {
-			System.out.println(serv + " [Pos]-> " + bindings.getPosRequirments().get(serv));
-		}
-		for (String serv : bindings.getPreRequirments().keySet()) {
-			System.out.println(serv + " [Pre]-> " + bindings.getPreRequirments().get(serv));
-		}
-		for (String serv : bindings.getAlwaysRequiredRequirments().keySet()) {
-			System.out.println(serv + " [Always]-> " + bindings.getAlwaysRequiredRequirments().get(serv));
-		}
-		for (String serv : bindings.getAlwaysRequiredServices().keySet()) {
-			System.out.println(serv + " [Always]-> " + bindings.getAlwaysRequiredServices().get(serv));
-		}*/
-	}
-
+	
 	public String getProjectName() {
 		return projectName;
 	}
@@ -1752,6 +1733,8 @@ public class TDCCheckerGenerator extends FileDescriptor {
 			this.variables.put(var.getName(), var);
 		}
 	}
+
+
 	
 }
 //ctrl_send_data.set_actions(pre){wait_state();}

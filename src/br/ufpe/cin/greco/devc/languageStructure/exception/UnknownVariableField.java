@@ -1,6 +1,6 @@
 package br.ufpe.cin.greco.devc.languageStructure.exception;
 
-import br.ufpe.cin.greco.devc.languageStructure.Variable;
+import br.ufpe.cin.greco.devc.languageStructure.filetype.tdevice.Variable;
 
 public class UnknownVariableField extends Exception {
 	

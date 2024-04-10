@@ -22,8 +22,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import br.ufpe.cin.greco.devc.languageStructure.Register;
 import br.ufpe.cin.greco.devc.languageStructure.TDCCheckerGenerator;
+import br.ufpe.cin.greco.devc.languageStructure.filetype.tdevice.Register;
 import br.ufpe.cin.greco.devc.languageStructure.ltl.Behavior;
 import br.ufpe.cin.greco.devc.languageStructure.ltl.OrthoRegion;
 import br.ufpe.cin.greco.devc.languageStructure.ltl.Violation;

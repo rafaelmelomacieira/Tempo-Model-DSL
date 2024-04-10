@@ -37,6 +37,7 @@ public abstract class FileDescriptor {
 		this.fileType = fileType;
 	}
 	
+	public abstract void setDefinition(TerminusFileDefinition tdef);
 	
 
 }
