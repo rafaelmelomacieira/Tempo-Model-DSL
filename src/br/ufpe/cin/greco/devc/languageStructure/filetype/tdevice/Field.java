@@ -133,7 +133,7 @@ public class Field {
 		return type;
 	}
 	
-	public void buildFields(TDCCheckerGenerator tdevcChecker){
+	public void buildFields(TDevice tDevice){
 		Field currentField; 
 		for (String fields : this.getFields().keySet()) {
 			currentField = this.getFields().get(fields); 
@@ -141,7 +141,7 @@ public class Field {
 				//System.out.println(currentField.getName());
 			}else{
 				//System.out.println("sub - " + currentField.getName());
-				currentField.buildFields(tdevcChecker);
+				currentField.buildFields(tDevice);
 			}
 		}
 	}
