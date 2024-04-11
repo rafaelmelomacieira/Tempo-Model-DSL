@@ -41,12 +41,31 @@ import freemarker.template.TemplateExceptionHandler;
 
 public class TDCCheckerGenerator {
 
-	
-	private String appName;
 	private String absoluteDir;
+	private String appName;
+	private String projectName;
+	public HashSet<FileDescriptor> getFiles() {
+		return files;
+	}
+
+
+	public void setFiles(HashSet<FileDescriptor> files) {
+		this.files = files;
+	}
+
 	private String kernelImageDir;
+	public String getProjectName() {
+		return projectName;
+	}
+
+	private HashSet<FileDescriptor> files = new HashSet<FileDescriptor>();
+
+	public void setProjectName(String projectName) {
+		this.projectName = projectName;
+	}
+
 	private CodeLanguage codelanguage;
-	private Integer wordSize = 32;
+	
 	
 	private IDevCState globalState;
 	private int nc = 0;
@@ -99,145 +118,13 @@ public class TDCCheckerGenerator {
 		this.globalState.setSubStateMachine(0);
 	}
 	
-	private Integer resolveIntegerFormat(String value){
-		if (value.matches("[0-9]+")){
-			return Integer.parseInt(value,10);
-		}else if (value.matches("[0][x][0-9abcdefABCDEF]+")){
-			return Integer.parseInt(value.substring(2, value.length()),16);
-		}else if (value.matches("[b][01]+")){
-			return Integer.parseInt(value.substring(1, value.length()),2);
+	public void generateCode() throws IOException {
+		for (FileDescriptor file : getFiles()) {
+			generateMDDCSourceCode(file); //DEVE IR PARA O MAIN da geração
 		}
-		return null;
 	}
-	
-	
-	
-	private void checkForModelsInconsistencies(IDevCState state){
-		System.out.println("Checking for Inconsistencies");
-	}
-	
-	
-	
 		
-	private void createViolationsDotFiles(IDevCState state) {
-		Violation viol;
-		for (String vioName : state.getViolations().keySet()) {
-			viol = state.getViolations().get(vioName);
-			//REMOVER  FileManagement.createDotFile("violation_" + viol.getName(), "./dotFiles", DottyWriter.automatonToDot(LTL2BA4J.formulaToBA(viol.getNegatedLtlf())), true);
-			FileManagement.createImageFile("violation_" + viol.getName(), "./dotFiles", FileManagement.ImageType.PNG, true);
-		}
-		for (String sonName : state.getSons().keySet()) {
-			createViolationsDotFiles(state.getSons().get(sonName));
-		}
-	}
-	
-	private void createBehaviorsDotFiles(IDevCState state) {
-		br.ufpe.cin.greco.devc.languageStructure.ltl.Behavior behavior;
-		for (String behaveName : state.getBehaviors().keySet()) {
-			behavior = state.getBehaviors().get(behaveName);
-//REMOVER			FileManagement.createDotFile("behavior_" + behavior.getName(), "./dotFiles", DottyWriter.automatonToDot(LTL2BA4J.formulaToBA(behavior.getLtlf())), true);
-			FileManagement.createImageFile("behavior_" + behavior.getName(), "./dotFiles", FileManagement.ImageType.PNG, true);
-		}
-		for (String sonName : state.getSons().keySet()) {
-			createBehaviorsDotFiles(state.getSons().get(sonName));
-		}
-	}
-	
-	private void createOrthogonalRegionDotFiles(IDevCState state){
-		OrthoRegion tmpReg;
-		for (String regName : state.getMyOrthoRegions().keySet()) {
-			tmpReg = state.getMyOrthoRegions().get(regName);
-			FileManagement.createDotFile("orthoReg_" + tmpReg.getRegionName(), "./dotFiles", tmpReg.getRegionInitialState().getFullFSM(), true);
-			FileManagement.createImageFile("orthoReg_" + tmpReg.getRegionName(), "./dotFiles", FileManagement.ImageType.PNG, true);
-		}
-		for (String sonName : state.getSons().keySet()) {
-			createOrthogonalRegionDotFiles(state.getSons().get(sonName));
-		}
-	}
-
-	private void linkInitialStates(IDevCState state) {
-		IDevCState target;
-		for (ExitPoint extp : state.getExitPoints()) {
-			target = extp.getTargetState();
-			//System.out.println(state.getName() + " -> " + target.getName());
-			//System.out.println(state.getSons() + " -> " + target.getSons());
-			if (!target.getSons().isEmpty()){
-				for (IDevCState son : target.getInitialsSons()) {
-					extp.setTargetState(son);
-					extp.setTarget(son.getName());
-				}
-			}else{
-				extp.setTargetState(target);
-				extp.setTarget(target.getName());
-			}
-		}
-		for (String key : state.getSons().keySet()) {
-			linkInitialStates(state.getSons().get(key));
-		}
-	}
-
-	private String mergeLTLf(IDevCState state){
-		int ltlNum = state.getViolations().size();
-		int i = 0;
-		StringBuffer sb = new StringBuffer();
-		for (String keyset : state.getViolations().keySet()) {
-			sb.append(state.getViolations().get(keyset).getLtlf());
-			i++;
-			if (i < ltlNum) {
-				sb.append(" && ");
-			}
-		}
-		return sb.toString();
-	}
-	
-	private void appendEntryPoints(IDevCState state){
-		ExitPoint exp;
-		IDevCState source, target;
-		//if(state.getSons().isEmpty()){
-		
-		for (IDevCState key : entryPoints.keySet()) {
-			for (String sourceName : state.getInheritors().keySet()){
-				source = state.getInheritors().get(sourceName);
-				if (source.getLevel() == key.getLevel() && source.getName() != key.getName() && source.getHomeLand() == key.getHomeLand()){
-					for (EntryPoint eKey : entryPoints.get(key)) {
-						//System.out.println("[ENTRY]: " + source.getName() + "[" + this.getPropositionsLib().get(eKey.getLtlf()) + "] -> " + key.getName());
-						exp = new ExitPoint(key.getName(), eKey.getLtlf(), eKey.getz3Ltlf(),  true);
-						exp.setTargetState(state.getInheritors().get(key.getName()));
-						source.getExitPoints().add(exp);
-						}
-				}
-			}
-		}
-		
-			/*if (!state.getName().equalsIgnoreCase(key.getName())){
-				for (EntryPoint eKey : entryPoints.get(key)) {
-					exp = new ExitPoint(key.getName(), eKey.getLtlf());
-					//System.out.println(state.getLabel() + " -> " + key.getLabel());
-					exp.setTargetState(this.globalState.getInheritors().get(key.getName()));
-					state.getExitPoints().add(exp);
-				}
-			}
-		}*/
-		//}
-		/*for (ExitPoint ext : state.getExitPoints()) {
-			//System.out.println(state.getLabel() + " -> " + ext.getTargetState().getLabel() + " [ label = \"" + ext.getLtlf() + "\"];");
-			//System.out.println(state.getLabel());
-		}*/
-		
-		/*for (String key : state.getSons().keySet()) {
-			if (state.getSons().isEmpty()){
-			}
-			if (state.getSons().get(key).getSons().size() == 0){
-				appendEntryPoints(state.getSons().get(key));
-			}else{
-				appendEntryPoints(state.getSons().get(key));
-			}
-		}*/
-	}
-	
-	
-	
-	public void generateMDDCSourceCode() throws IOException{
+	public void generateMDDCSourceCode(FileDescriptor fileDesc) throws IOException{
 		Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
 		cfg.setDirectoryForTemplateLoading(new File("templates"));
 		cfg.setDefaultEncoding("UTF-8");
@@ -245,12 +132,12 @@ public class TDCCheckerGenerator {
 		SystemVerilogCodeGen sv = new SystemVerilogCodeGen();
 		sv.setConfiguration(cfg);
 		DeviceModel devmodel = new DeviceModel(this.getProjectName());
-		for (String regname : this.getRegisters().keySet()) {
-			devmodel.addRegister(this.getRegisters().get(regname));
+		for (String regname : fileDesc.getRegisters().keySet()) {
+			devmodel.addRegister(fileDesc.getRegisters().get(regname));
 		}
 		devmodel.setGlobalState(globalState);
-		devmodel.setHfsmProp(this.getPropositionsLib());
-		devmodel.setHfsmProp(this.getPropositionsLib());
+		devmodel.setHfsmProp(fileDesc.getPropositionsLib());
+		devmodel.setHfsmProp(fileDesc.getPropositionsLib());
 		sv.getDevicesFSMSourceCode(devmodel);
 	}
 	
@@ -314,9 +201,6 @@ public class TDCCheckerGenerator {
 			}
 		}
 	}*/
-	
-	
-	p
 	
 	
 	//public TDCCheckerGenerator(MethodDefinition metDef) {
@@ -1068,7 +952,7 @@ public class TDCCheckerGenerator {
 		System.out.println("** Project: " + this.projectName);
 		System.out.println("** Using OS Kernel Image: " + (this.getKernelImageDir().equals("")?"[No]":("[Yes] -> " + this.kernelImageDir)));
 		System.out.println("** Output Dir: " + this.absoluteDir + "driver_debugger/" + this.projectName + "/");
-		System.out.println("** Device Base Address: [" + this.baseAddress + "]");
+		//System.out.println("** Device Base Address: [" + this.baseAddress + "]");
 		System.out.println();
 	}
 
