@@ -34,12 +34,12 @@ public class Register extends Field {
 	}
 	
 	@Override
-	public void buildFields(TDCCheckerGenerator tdevcChecker) {
+	public void buildFields(TDevice tDevice) {
 		if(format.equals("")){
-			super.buildFields(tdevcChecker);
+			super.buildFields(tDevice);
 		}else{
-			this.setFields(tdevcChecker.getFormats().get(format).getFields());
-			super.buildFields(tdevcChecker);
+			this.setFields(tDevice.getFormats().get(format).getFields());
+			super.buildFields(tDevice);
 		}
 	}
 	
