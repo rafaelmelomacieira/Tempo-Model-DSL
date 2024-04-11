@@ -8,7 +8,7 @@ import br.ufpe.cin.greco.devc.languageStructure.ltl.IDevCState;
 
 public abstract class FileDescriptor {
 	
-	private String projectName;
+	private String elementName;
 	
 	private IDevCState globalState;
 	
@@ -31,29 +31,43 @@ public abstract class FileDescriptor {
 		}
 	};
 	
+	protected abstract void appendEntryPoints(IDevCState globalState);
+	protected abstract void checkForModelsInconsistencies(IDevCState globalState);
+	protected abstract void checkForPropertiesContradictions();
+	protected abstract void createViolationsDotFiles(IDevCState globalState);
+	protected abstract void createBehaviorsDotFiles(IDevCState globalState);
+	protected abstract void createOrthogonalRegionDotFiles(IDevCState globalState);
+	protected abstract void setDefinition(TerminusFileDefinition tdef);
+	
 	private FileType fileType;
 	private HashMap<String, String> propositionsLib = new HashMap<String, String>();
 	private HashMap<String, String> ltlPropositionsLib = new HashMap<String, String>();
 	private HashMap<IDevCState,HashSet<EntryPoint>> entryPoints = new HashMap<IDevCState,HashSet<EntryPoint>>();
 	
+	public HashMap<IDevCState, HashSet<EntryPoint>> getEntryPoints() {
+		return entryPoints;
+	}
+
+	public void setEntryPoints(HashMap<IDevCState, HashSet<EntryPoint>> entryPoints) {
+		this.entryPoints = entryPoints;
+	}
+
 	public FileType getFileType() {
 		return fileType;
 	}
 
-	public String getProjectName() {
-		return projectName;
+	public String getElementName() {
+		return elementName;
 	}
 	
-	public void setProjectName(String projectName) {
-		this.projectName = projectName;
+	public void setElementName(String elementName) {
+		this.elementName = elementName;
 	}
 
 	public FileDescriptor(String projectName, FileType fileType) {
-		this.projectName = projectName;
+		this.elementName = projectName;
 		this.fileType = fileType;
-	}
-	
-	public abstract void setDefinition(TerminusFileDefinition tdef);
+	}	
 	
 	public Integer addProposition(String prop){
 		System.out.println("Prop: " + prop);
@@ -90,14 +104,13 @@ public abstract class FileDescriptor {
 	
 	public IDevCState getGlobalState() {
 		return globalState;
-	}
-	
-	
+	}	
 
 	public void setGlobalState(IDevCState gs){
 		this.globalState = gs;
 		this.globalState.setLevel(1);
 		this.globalState.setSubStateMachine(0);
 	}
+	
 
 }

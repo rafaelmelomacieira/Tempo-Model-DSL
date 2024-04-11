@@ -12,6 +12,7 @@ import br.ufpe.cin.greco.devc.languageStructure.TerminusFileDefinition;
 import br.ufpe.cin.greco.devc.languageStructure.ltl.EntryPoint;
 import br.ufpe.cin.greco.devc.languageStructure.ltl.ExitPoint;
 import br.ufpe.cin.greco.devc.languageStructure.ltl.IDevCState;
+import br.ufpe.cin.greco.devc.languageStructure.ltl.OrthoRegion;
 import br.ufpe.cin.greco.devc.languageStructure.ltl.Violation;
 import br.ufpe.cin.greco.devc.languageStructure.type.AccessType;
 import br.ufpe.cin.greco.devc.languageStructure.type.FieldType;
@@ -21,7 +22,7 @@ import br.ufpe.cin.greco.devc.utils.FileManagement;
 public class TDevice extends FileDescriptor  {
 	
 	private Integer baseAddress;
-	
+	private Integer wordSize = 32; //Deve ir para TPlatform
 		
 	private HashMap<String, Pattern> patterns = new HashMap<String, Pattern>();
 	private HashMap<String, Register> registers = new HashMap<String, Register>();
@@ -53,10 +54,7 @@ public class TDevice extends FileDescriptor  {
 		this.registersAlias.put(reg.getAlias(), reg);
 	}
 	
-	public void setProjectName(String projectName) {
-		this.projectName = projectName;
-	}
-	
+
 		
 	public HashMap<String, Variable> getVariables(){
 		return this.variables;
@@ -76,8 +74,8 @@ public class TDevice extends FileDescriptor  {
 		return registersAlias;
 	}
 
-	public TDevice(String projectName, FileType fileType) {
-		super(projectName, fileType);
+	public TDevice(String elementName, FileType fileType) {
+		super(elementName, fileType);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -88,11 +86,6 @@ public class TDevice extends FileDescriptor  {
 	}
 	
 	
-
-	public String getAppName() {
-		return appName;
-	}
-
 	public Integer getBaseAddress() {
 		return baseAddress;
 	}
@@ -201,7 +194,7 @@ public class TDevice extends FileDescriptor  {
 			}
 			//promelaContent.append(state.getInheritors().size() + "\n");
 			promelaContent.append(promelaDepthSearch(state,0));
-			FileManagement.createPromelaFile("promelaFile_" + this.getProjectName(), null, promelaContent.toString(), true);
+			FileManagement.createPromelaFile("promelaFile_" + this.getElementName(), null, promelaContent.toString(), true);
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -258,10 +251,10 @@ public class TDevice extends FileDescriptor  {
 		}
 		z3Content.append(counter + "\n");
 		z3Content.append(z3ContentTmp.toString());
-		z3Content.append(propositionsLib.size() + "\n");
+		z3Content.append(getPropositionsLib().size() + "\n");
 		try{
-			for (int i = 0; i < propositionsLib.size(); i++) {
-				z3Content.append(getValidationFormatProposition(propositionsLib.get("p" + i)) + "\n");
+			for (int i = 0; i < getPropositionsLib().size(); i++) {
+				z3Content.append(getValidationFormatProposition(getPropositionsLib().get("p" + i)) + "\n");
 			}
 			z3Content.append(state.getInheritors().size() + "\n");
 			for (String stateName : state.getInheritors().keySet()) {
@@ -272,7 +265,7 @@ public class TDevice extends FileDescriptor  {
 				}
 				z3Content.append("\n");
 			}
-			FileManagement.createZ3File("z3File_" + this.getProjectName(), null, z3Content.toString(), true);
+			FileManagement.createZ3File("z3File_" + this.getElementName(), null, z3Content.toString(), true);
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -307,9 +300,9 @@ public class TDevice extends FileDescriptor  {
 				if (typeProp[0].contains(".")){
 					return "cmp%" + typeProp[0].replace(".", "%");
 				}else{
-					if (this.getRegisters().containsKey(typeProp[0]) || tDevice.getRegistersAlias().containsKey(typeProp[0])){
+					if (this.getRegisters().containsKey(typeProp[0]) || this.getRegistersAlias().containsKey(typeProp[0])){
 						return "reg%" + typeProp[0];
-					}else if (globalState.getInheritors().containsKey(typeProp[0])){
+					}else if (getGlobalState().getInheritors().containsKey(typeProp[0])){
 						return "est%" + typeProp[0];
 					}else if (this.getVariables().containsKey(typeProp[0])){
 						return "var%" + typeProp[0];
@@ -332,9 +325,9 @@ public class TDevice extends FileDescriptor  {
 				if (typeProp[0].contains(".")){
 					stage1 = "cmp%" + typeProp[0].replace(".", "%");
 				}else{
-					if (this.getRegisters().containsKey(typeProp[0]) || tDevice.getRegistersAlias().containsKey(typeProp[0])){
+					if (this.getRegisters().containsKey(typeProp[0]) || getRegistersAlias().containsKey(typeProp[0])){
 						stage1 = "reg%" + typeProp[0];
-					}else if (globalState.getInheritors().containsKey(typeProp[0])){
+					}else if (getGlobalState().getInheritors().containsKey(typeProp[0])){
 						stage1 = "est%" + typeProp[0];
 					}else if (this.getVariables().containsKey(typeProp[0])){
 						stage1 = "var%" + typeProp[0];
@@ -355,13 +348,13 @@ public class TDevice extends FileDescriptor  {
 				if (typeProp[0].contains(".")){
 					return stage1 + " " + segProp[1] + " cmp%" + typeProp[0];
 				}else{
-					if (tDevice.getRegisters().containsKey(typeProp[0])){
+					if (this.getRegisters().containsKey(typeProp[0])){
 						return stage1 + " " + segProp[1] + " reg%" + typeProp[0];
-					}else if (globalState.getInheritors().containsKey(typeProp[0])){
+					}else if (getGlobalState().getInheritors().containsKey(typeProp[0])){
 						return stage1 + " " + segProp[1] + " est%" + typeProp[0];
-					}else if (tDevice.getVariables().containsKey(typeProp[0])){
+					}else if (this.getVariables().containsKey(typeProp[0])){
 						return stage1 + " " + segProp[1] + " var%" + typeProp[0];
-					}else if (getPatterns().containsKey(typeProp[0])){
+					}else if (this.getPatterns().containsKey(typeProp[0])){
 						return stage1 + " " + segProp[1] + " pat%" + typeProp[0];
 					}else{
 						return stage1 + " " + segProp[1] + " " + resolveIntegerFormat(typeProp[0]);
@@ -370,23 +363,23 @@ public class TDevice extends FileDescriptor  {
 			}
 	
 		default:
-			return getValidationFormatProposition(segProp[0] + " " + segProp[1] + " " + segProp[2], tDevice);
+			return getValidationFormatProposition(segProp[0] + " " + segProp[1] + " " + segProp[2]);
 			//throw new Exception("falha [" + prop + "] Size:" + segProp.length);
 		}
 	}
 	
-	ublic void validateStates(IDevCState state, String ltls) throws Exception{
+	public void validateStates(IDevCState state, String ltls) throws Exception{
 		String cltl;
 		//int initial = -1;
 		Integer counter = 0;
 		state.setLiteral_rules(ltls);
 		IDevCState son, tmptarget;
 		if (!state.getEntryPoints().isEmpty()){
-			entryPoints.put(state, state.getEntryPoints());
+			getEntryPoints().put(state, state.getEntryPoints());
 		}
 		for (ExitPoint extp : state.getExitPoints()) {
-			if (this.globalState.getInheritors().containsKey(extp.getTarget())){
-				tmptarget = this.globalState.getInheritors().get(extp.getTarget());
+			if (getGlobalState().getInheritors().containsKey(extp.getTarget())){
+				tmptarget = getGlobalState().getInheritors().get(extp.getTarget());
 				if (state.getHomeLand() == tmptarget.getHomeLand()){
 					extp.setTargetState(tmptarget);
 				}else{
@@ -422,20 +415,20 @@ public class TDevice extends FileDescriptor  {
 	public void checkSemantics(){
 		StringBuffer readVal = new StringBuffer();
 		try{
-			IDevCState gs = this.globalState;
-			validateStates(gs,mergeLTLf(globalState));
-			appendEntryPoints(globalState);
+			IDevCState gs = getGlobalState();
+			validateStates(gs,mergeLTLf(gs));
+			appendEntryPoints(gs);
 			//linkInitialStates(globalState);
-			for (String prop : tDevice.getPropositionsLib().keySet()) {
-				System.out.println(prop + " - " + tDevice.getPropositionsLib().get(prop));
+			for (String prop : getPropositionsLib().keySet()) {
+				System.out.println(prop + " - " + getPropositionsLib().get(prop));
 			}
-			createZ3Files(globalState);
-			createPromelaFiles(globalState);
-			checkForModelsInconsistencies(globalState);
+			createZ3Files(gs);
+			createPromelaFiles(gs);
+			checkForModelsInconsistencies(gs);
 			checkForPropertiesContradictions();
-			createViolationsDotFiles(globalState);
-			createBehaviorsDotFiles(globalState);
-			createOrthogonalRegionDotFiles(globalState);
+			createViolationsDotFiles(gs);
+			createBehaviorsDotFiles(gs);
+			createOrthogonalRegionDotFiles(gs);
 			/*for (String ltl: ltlPropositionsLib.keySet()) {
 				System.out.println(ltl + ": " + ltlPropositionsLib.get(ltl));
 			}*/
@@ -445,16 +438,149 @@ public class TDevice extends FileDescriptor  {
 				readVal.append((char) ps.getInputStream().read());
 			}
 			Editor.terminalMsg(String.valueOf(readVal));
-			FileManagement.createDotFile("globalStateGraph", "./dotFiles", globalState.getFullFSM(), true);
+			FileManagement.createDotFile("globalStateGraph", "./dotFiles", getGlobalState().getFullFSM(), true);
 			FileManagement.createImageFile("globalStateGraph", "./dotFiles", FileManagement.ImageType.PNG, true);
-			generateMDDCSourceCode();
+			//generateMDDCSourceCode(); FOI PARA O TDCCheckerGen
 		}catch (Exception e){
 			System.err.println("Falha: " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
 	
-	private void checkForPropertiesContradictions(){
+	private Integer resolveIntegerFormat(String value){
+		if (value.matches("[0-9]+")){
+			return Integer.parseInt(value,10);
+		}else if (value.matches("[0][x][0-9abcdefABCDEF]+")){
+			return Integer.parseInt(value.substring(2, value.length()),16);
+		}else if (value.matches("[b][01]+")){
+			return Integer.parseInt(value.substring(1, value.length()),2);
+		}
+		return null;
+	}
+	
+	protected void checkForModelsInconsistencies(IDevCState state){
+		System.out.println("Checking for Inconsistencies");
+	}
+	
+	
+	
+		
+	protected void createViolationsDotFiles(IDevCState state) {
+		Violation viol;
+		for (String vioName : state.getViolations().keySet()) {
+			viol = state.getViolations().get(vioName);
+			//REMOVER  FileManagement.createDotFile("violation_" + viol.getName(), "./dotFiles", DottyWriter.automatonToDot(LTL2BA4J.formulaToBA(viol.getNegatedLtlf())), true);
+			FileManagement.createImageFile("violation_" + viol.getName(), "./dotFiles", FileManagement.ImageType.PNG, true);
+		}
+		for (String sonName : state.getSons().keySet()) {
+			createViolationsDotFiles(state.getSons().get(sonName));
+		}
+	}
+	
+	protected void createBehaviorsDotFiles(IDevCState state) {
+		br.ufpe.cin.greco.devc.languageStructure.ltl.Behavior behavior;
+		for (String behaveName : state.getBehaviors().keySet()) {
+			behavior = state.getBehaviors().get(behaveName);
+//REMOVER			FileManagement.createDotFile("behavior_" + behavior.getName(), "./dotFiles", DottyWriter.automatonToDot(LTL2BA4J.formulaToBA(behavior.getLtlf())), true);
+			FileManagement.createImageFile("behavior_" + behavior.getName(), "./dotFiles", FileManagement.ImageType.PNG, true);
+		}
+		for (String sonName : state.getSons().keySet()) {
+			createBehaviorsDotFiles(state.getSons().get(sonName));
+		}
+	}
+	
+	protected void createOrthogonalRegionDotFiles(IDevCState state){
+		OrthoRegion tmpReg;
+		for (String regName : state.getMyOrthoRegions().keySet()) {
+			tmpReg = state.getMyOrthoRegions().get(regName);
+			FileManagement.createDotFile("orthoReg_" + tmpReg.getRegionName(), "./dotFiles", tmpReg.getRegionInitialState().getFullFSM(), true);
+			FileManagement.createImageFile("orthoReg_" + tmpReg.getRegionName(), "./dotFiles", FileManagement.ImageType.PNG, true);
+		}
+		for (String sonName : state.getSons().keySet()) {
+			createOrthogonalRegionDotFiles(state.getSons().get(sonName));
+		}
+	}
+
+	private void linkInitialStates(IDevCState state) {
+		IDevCState target;
+		for (ExitPoint extp : state.getExitPoints()) {
+			target = extp.getTargetState();
+			//System.out.println(state.getName() + " -> " + target.getName());
+			//System.out.println(state.getSons() + " -> " + target.getSons());
+			if (!target.getSons().isEmpty()){
+				for (IDevCState son : target.getInitialsSons()) {
+					extp.setTargetState(son);
+					extp.setTarget(son.getName());
+				}
+			}else{
+				extp.setTargetState(target);
+				extp.setTarget(target.getName());
+			}
+		}
+		for (String key : state.getSons().keySet()) {
+			linkInitialStates(state.getSons().get(key));
+		}
+	}
+
+	private String mergeLTLf(IDevCState state){
+		int ltlNum = state.getViolations().size();
+		int i = 0;
+		StringBuffer sb = new StringBuffer();
+		for (String keyset : state.getViolations().keySet()) {
+			sb.append(state.getViolations().get(keyset).getLtlf());
+			i++;
+			if (i < ltlNum) {
+				sb.append(" && ");
+			}
+		}
+		return sb.toString();
+	}
+	
+	protected void appendEntryPoints(IDevCState state){
+		ExitPoint exp;
+		IDevCState source, target;
+		//if(state.getSons().isEmpty()){
+		
+		for (IDevCState key : getEntryPoints().keySet()) {
+			for (String sourceName : state.getInheritors().keySet()){
+				source = state.getInheritors().get(sourceName);
+				if (source.getLevel() == key.getLevel() && source.getName() != key.getName() && source.getHomeLand() == key.getHomeLand()){
+					for (EntryPoint eKey : getEntryPoints().get(key)) {
+						//System.out.println("[ENTRY]: " + source.getName() + "[" + this.getPropositionsLib().get(eKey.getLtlf()) + "] -> " + key.getName());
+						exp = new ExitPoint(key.getName(), eKey.getLtlf(), eKey.getz3Ltlf(),  true);
+						exp.setTargetState(state.getInheritors().get(key.getName()));
+						source.getExitPoints().add(exp);
+						}
+				}
+			}
+		}
+		/*if (!state.getName().equalsIgnoreCase(key.getName())){
+				for (EntryPoint eKey : entryPoints.get(key)) {
+					exp = new ExitPoint(key.getName(), eKey.getLtlf());
+					//System.out.println(state.getLabel() + " -> " + key.getLabel());
+					exp.setTargetState(this.globalState.getInheritors().get(key.getName()));
+					state.getExitPoints().add(exp);
+				}
+			}
+		}*/
+		//}
+		/*for (ExitPoint ext : state.getExitPoints()) {
+			//System.out.println(state.getLabel() + " -> " + ext.getTargetState().getLabel() + " [ label = \"" + ext.getLtlf() + "\"];");
+			//System.out.println(state.getLabel());
+		}*/
+		
+		/*for (String key : state.getSons().keySet()) {
+			if (state.getSons().isEmpty()){
+			}
+			if (state.getSons().get(key).getSons().size() == 0){
+				appendEntryPoints(state.getSons().get(key));
+			}else{
+				appendEntryPoints(state.getSons().get(key));
+			}
+		}*/
+	}
+	
+	protected void checkForPropertiesContradictions(){
 		//aqui vanessa chama a checagem de LTLs.
 		System.out.println("Checking for Contradictions");
 	}
