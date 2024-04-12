@@ -90,9 +90,6 @@ public class TDevice extends FileDescriptor  {
 		return baseAddress;
 	}
 
-	public String getAbsoluteDir() {
-		return absoluteDir;
-	}
 	
 	public HashMap<String, Pattern> getPatterns() {
 		return patterns;

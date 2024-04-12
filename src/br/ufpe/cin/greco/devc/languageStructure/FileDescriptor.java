@@ -1,5 +1,6 @@
 package br.ufpe.cin.greco.devc.languageStructure;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -38,6 +39,7 @@ public abstract class FileDescriptor {
 	protected abstract void createBehaviorsDotFiles(IDevCState globalState);
 	protected abstract void createOrthogonalRegionDotFiles(IDevCState globalState);
 	protected abstract void setDefinition(TerminusFileDefinition tdef);
+	public abstract Object precompileMDDCSourceCode(Object obj) throws IOException;
 	
 	private FileType fileType;
 	private HashMap<String, String> propositionsLib = new HashMap<String, String>();
