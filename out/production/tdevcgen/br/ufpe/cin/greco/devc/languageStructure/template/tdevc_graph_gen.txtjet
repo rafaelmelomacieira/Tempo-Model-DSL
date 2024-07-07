@@ -1,9 +1,0 @@
-<%@jet package="br.ufpe.cin.greco.devc.languageStructure.tdevctemplate" imports="br.ufpe.cin.greco.devc.languageStructure.* java.util.*" class="TDEVCGraphGen" %>
-<%TDCCheckerGenerator tdgen = (TDCCheckerGenerator)argument;%>
-#!/bin/bash
-echo "Creating Graph .PNG images..."
-<%for (String serviceS : tdgen.getServices().keySet()) {%>
-echo "From tdc_automata_<%=serviceS%>.dot -> tdc_automata_<%=serviceS%>.png"
-dot -Tpng tdc_automata_<%=serviceS%>.dot > tdc_automata_<%=serviceS%>.png
-<%}%>
-echo
