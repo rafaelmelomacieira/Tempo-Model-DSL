@@ -1,8 +1,0 @@
-digraph divisor{
-node [shape = "record" 
- style="filled" ];
-node0 [ label = "[0:7] sdivisor[RW]"
- fillcolor = "green"];
-node1 [ label = "[8:15] divisor[RW]"
- fillcolor = "green"];
-}

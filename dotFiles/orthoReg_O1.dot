@@ -1,5 +1,0 @@
-digraph SA{
-SA[shape="Mdiamond"];
-SB -> SA [label = "p2 && p3"];
-SA -> SB [label = "p0 && p1"];
-}

@@ -1,6 +1,0 @@
-digraph MRCMD{
-node [shape = "record" 
- style="filled" ];
-node0 [ label = "[0:7] MRCMD[RO]"
- fillcolor = "yellow"];
-}

@@ -1,8 +1,0 @@
-digraph CTS{
-node [shape = "record" 
- style="filled" ];
-node0 [ label = "[0:1] SCALE[RW]"
- fillcolor = "green"];
-node1 [ label = "[2:31] RESERVED[--]"
- fillcolor = "red"];
-}

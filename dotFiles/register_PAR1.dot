@@ -1,6 +1,0 @@
-digraph PAR1{
-node [shape = "record" 
- style="filled" ];
-node0 [ label = "[0:7] PAB[RW]"
- fillcolor = "green"];
-}

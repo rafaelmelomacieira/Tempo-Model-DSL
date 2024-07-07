@@ -1,5 +1,0 @@
-digraph DOWN{
-DOWN[shape="Mdiamond"];
-UP -> DOWN [label = "p0 && p2"];
-DOWN -> UP [label = "p0 && p1"];
-}

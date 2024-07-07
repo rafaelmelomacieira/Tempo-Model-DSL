@@ -1,6 +1,0 @@
-digraph INDEXREG{
-node [shape = "record" 
- style="filled" ];
-node0 [ label = "[0:15] INDEX[RW]"
- fillcolor = "green"];
-}
