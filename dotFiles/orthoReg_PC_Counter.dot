@@ -1,4 +1,0 @@
-digraph INSTRUCTION_A{
-INSTRUCTION_A[shape="Mdiamond"];
-INSTRUCTION_A -> INSTRUCTION_A [label = "p0 && p1"];
-}

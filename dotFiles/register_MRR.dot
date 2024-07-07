@@ -1,8 +1,0 @@
-digraph MRR{
-node [shape = "record" 
- style="filled" ];
-node0 [ label = "[0:7] MDRAH[RW]"
- fillcolor = "green"];
-node1 [ label = "[8:15] MDRAL[RW]"
- fillcolor = "green"];
-}

@@ -1,8 +1,0 @@
-digraph EPAR{
-node [shape = "record" 
- style="filled" ];
-node0 [ label = "[0:5] EROA[RW]"
- fillcolor = "green"];
-node1 [ label = "[6:7] PHY_ADR[RW]"
- fillcolor = "green"];
-}

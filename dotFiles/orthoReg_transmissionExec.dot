@@ -1,9 +1,0 @@
-digraph TXSDPKGIDLE{
-TXSDPKGIDLE[shape="Mdiamond"];
-TXSDPKGSDING -> TXSDPKGIDLE [label = "p28 && p29"];
-TXSDPKGSDING -> TXSDPKGSDING [label = "p24 && p25 || p26 && p27"];
-TXSDPKGIDLE -> TXSDPKGSDING [label = "p18 && p19"];
-TXSDPKGIDLE -> TXSDPKGSDING [label = "p18 && p20"];
-TXSDPKGIDLE -> TXSDPKGSDING [label = "p21 && p22"];
-TXSDPKGIDLE -> TXSDPKGSDING [label = "p21 && p23"];
-}

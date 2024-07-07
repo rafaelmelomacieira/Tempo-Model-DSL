@@ -1,8 +1,0 @@
-digraph txdata{
-node [shape = "record" 
- style="filled" ];
-node0 [ label = "[0:7] txdata[WO]"
- fillcolor = "blue"];
-node1 [ label = "[8:15] RESERVED[--]"
- fillcolor = "red"];
-}

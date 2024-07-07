@@ -1,6 +1,0 @@
-digraph MRCMDX1{
-node [shape = "record" 
- style="filled" ];
-node0 [ label = "[0:7] MRCMDX1[RO]"
- fillcolor = "yellow"];
-}

@@ -1,8 +1,0 @@
-digraph FCTR{
-node [shape = "record" 
- style="filled" ];
-node0 [ label = "[0:3] LWOT[--]"
- fillcolor = "white"];
-node1 [ label = "[4:7] HWOT[RW]"
- fillcolor = "green"];
-}

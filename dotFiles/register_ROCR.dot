@@ -1,8 +1,0 @@
-digraph ROCR{
-node [shape = "record" 
- style="filled" ];
-node0 [ label = "[0:6] ROC[RO]"
- fillcolor = "yellow"];
-node1 [ label = "[7] RXFU[RO]"
- fillcolor = "yellow"];
-}

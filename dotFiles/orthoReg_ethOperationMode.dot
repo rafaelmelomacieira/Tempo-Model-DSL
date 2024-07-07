@@ -1,7 +1,0 @@
-digraph UNDEF_OPER_MODE{
-UNDEF_OPER_MODE[shape="Mdiamond"];
-OPER8BITS -> OPER16BITS [label = "p3"];
-OPER16BITS -> OPER8BITS [label = "p4"];
-UNDEF_OPER_MODE -> OPER16BITS [label = "p3"];
-UNDEF_OPER_MODE -> OPER8BITS [label = "p4"];
-}

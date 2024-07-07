@@ -1,6 +1,0 @@
-digraph TXWRPKGIDLE{
-TXWRPKGIDLE[shape="Mdiamond"];
-TXWRPKGLEN -> TXWRPKGIDLE [label = "p18 && p19"];
-TXWRPKGWR -> TXWRPKGLEN [label = "p16 || p17"];
-TXWRPKGIDLE -> TXWRPKGWR [label = "p15"];
-}
