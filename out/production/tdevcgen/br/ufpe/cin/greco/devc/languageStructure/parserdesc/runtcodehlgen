@@ -1,3 +1,0 @@
-rm ../../ui/code/DevCLexer.java
-jflex -d ../../ui/code/ tdevc_lex_java_editorpane.y
-rm *.java
