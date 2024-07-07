@@ -1,0 +1,12 @@
+if test -d ../treq/; then
+  echo "Directory exists."
+  rm ../treq/*.java
+else
+  echo "Diretório não existe."
+  mkdir ../treq
+fi
+
+jflex -d ../treq/ treq_lex_java.y
+cup -progress -package doublem.tempo.dsl.treq treq_java.y
+cp sym.java parser.java ../treq/
+rm *.java
