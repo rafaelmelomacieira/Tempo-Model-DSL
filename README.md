@@ -22,6 +22,9 @@ The approach was validated through experiments using:
 - **DM9000A Ethernet Controller**
 - **Altera UART**
 
+![TEMPOTool](/docs/imgs/tdevcgen.png)
+*Screenshot of the TEMPOTool compiling the .tdsl description for the **DM9000A Ethernet Controller** experiment*
+
 Results demonstrate the effectiveness of the methodology in identifying critical HdS bugs while incurring minimal design time overhead and negligible execution-time impact for real hardware platforms.
 
 ## Repository Structure
@@ -42,9 +45,6 @@ Results demonstrate the effectiveness of the methodology in identifying critical
 ├── README.md              # Visão geral e instruções de uso do projeto
 └── tdevcgen.iml           # Arquivo de configuração do IntelliJ IDEA
 ```
-
-
-
 
 ## Getting Started
 To set up and use this project, follow the instructions in the [Installation Guide](docs/INSTALL.md).
