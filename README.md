@@ -29,21 +29,21 @@ Results demonstrate the effectiveness of the methodology in identifying critical
 
 ## Repository Structure
 ```
-├── c-lib/                 # Bibliotecas C para suporte ao projeto
-├── devc_samples/          # Exemplos de uso da DSL
-├── docs/                  # Documentação do projeto
-├── imgs/                  # Imagens utilizadas na documentação
-├── lib/                   # Bibliotecas auxiliares
-├── mddc_source_code/      # Código-fonte do MDDC
-├── modelChecking/         # Arquivos relacionados à verificação de modelos
-├── src/                   # Código-fonte principal da DSL
+├── c-lib/                 # C libraries for project support
+├── devc_samples/          # Examples of DSL usage
+├── docs/                  # Project documentation
+├── imgs/                  # Images used in the documentation
+├── lib/                   # Auxiliary libraries
+├── mddc_source_code/      # MDDC source code
+├── modelChecking/         # Files related to model verification
+├── src/                   # Main DSL source code
 │   └── doublem/
 │       └── tempo/
-├── templates/             # Modelos para geração de código
-├── .classpath             # Arquivo de configuração do classpath
-├── .project               # Arquivo de configuração do projeto
-├── README.md              # Visão geral e instruções de uso do projeto
-└── tdevcgen.iml           # Arquivo de configuração do IntelliJ IDEA
+├── templates/             # Templates for code generation
+├── .classpath             # Classpath configuration file
+├── .project               # Project configuration file
+├── README.md              # Project overview and usage instructions
+└── tdevcgen.iml           # IntelliJ IDEA configuration file
 ```
 
 ## Getting Started
